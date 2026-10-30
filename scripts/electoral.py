@@ -100,7 +100,8 @@ def largest_cities(path, zones):
     places = gpd.read_file(path)
     places = places[places.ADM0_A3 == "USA"].to_crs(CRS)
     name = lambda r: " ".join(r.NAME.split()) if "," in r.NAME else f"{r.NAME}, {r.ADM1NAME}"  # "Washington, D.C."
-    hit = gpd.sjoin(places, zones, predicate="within").sort_values("POP_MAX", ascending=False)
+    # nearest zone within 2 km: some points sit just off the clipped shoreline (Detroit, Duluth)
+    hit = gpd.sjoin_nearest(places, zones, max_distance=2000).sort_values("POP_MAX", ascending=False)
     out = {(int(r.ns), int(r.ew)): name(r) for _, r in hit.drop_duplicates(["ns", "ew"]).iterrows()}
     # a few small zones have no place inside: use the nearest one
     for _, z in zones.iterrows():
