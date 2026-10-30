@@ -119,6 +119,20 @@ input[type="range"] { accent-color: var(--accent); flex: 1 1 140px; min-width: 0
 textarea { width: 100%; min-height: 90px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; }
 .toast { color: var(--accent); font-size: 0.84rem; min-height: 1.2em; margin: 0; }
 footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
+
+/* Easter egg: type 538 or click the shield */
+.ec .ec-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+.ec .score { font-weight: 800; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.ec .score .r { color: var(--shield-red); }
+.ec .score .d { color: var(--shield-blue); }
+.ec .bar { position: relative; display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--line); }
+.ec .bar > div:first-child { background: var(--shield-blue); }
+.ec .bar > div:last-child { background: var(--shield-red); margin-left: auto; }
+.ec .bar .mid { position: absolute; left: 50%; top: -2px; bottom: -2px; border-left: 2px solid var(--ink); }
+.ec .zone { cursor: crosshair; stroke: var(--surface); stroke-width: 0.8; }
+.ec .zone.hl { stroke: var(--ink); stroke-width: 2.2; }
+.ec .ev { font-family: var(--font-ui); font-weight: 800; font-size: 13px; fill: #fff; text-anchor: middle; dominant-baseline: central; pointer-events: none;
+          paint-order: stroke; stroke: rgba(0, 0, 0, 0.45); stroke-width: 2.5px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -134,6 +148,20 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
       <p class="lede">Every point in the lower 48 is coloured by its nearest north–south (odd) and nearest east–west (even) Interstate. Pick a palette, build your own, or let the map drift through all of them.</p>
     </div>
   </header>
+
+  <section class="map-card ec" id="ec" hidden aria-labelledby="ec-title">
+    <div class="ec-head">
+      <div>
+        <div class="now" id="ec-title">The Interstate Electoral College</div>
+        <div class="now-sub">The 54 zones of the major-routes map as states, replaying the 2024 presidential election.</div>
+      </div>
+      <div class="row"><span class="score" id="ec-score"></span><button type="button" id="ec-close">Close</button></div>
+    </div>
+    <div class="bar" aria-hidden="true"><div id="ec-bar-d"></div><span class="mid"></span><div id="ec-bar-r"></div></div>
+    <div class="readout" id="ec-readout" aria-live="polite"><span class="hint">Hover or tap a zone. 270 to win.</span></div>
+    <svg class="map" id="ec-map" role="img" aria-label="Map of the 54 Interstate zones coloured by 2024 winner"></svg>
+    <p class="note">Population: Census 2020 block groups. Votes: 2024 county results, shared out within each county by population. Each zone gets 2 electoral votes plus House seats by Huntington–Hill, for 538 in all (Alaska and Hawaii aren’t on the map). Winner takes all; deeper colour means a wider margin.</p>
+  </section>
 
   <div class="work">
     <div class="stage" id="stage">
@@ -772,6 +800,62 @@ const DATA = /*__PALETTE_DATA__*/null;
     paintAll(targetsFor(pal));
   }
   for (const m of Object.keys(MODES)) $("#mode-" + m).addEventListener("click", () => setMode(m));
+
+  // ---------- Easter egg: type 538 or click the shield for the Interstate Electoral College ----------
+  const EC = DATA.pairs[0].electoral;
+  if (EC) {
+    const ecBox = $("#ec"), ecMap = $("#ec-map");
+    const zoneName = (z) => `I-${z.ns} × I-${z.ew}`;
+    const margin = (z) => (z.d - z.r) / z.t;
+    const lead = (z) => (margin(z) > 0 ? "D" : "R") + " +" + (Math.abs(margin(z)) * 100).toFixed(1);
+    let built = false;
+    function buildEC() {
+      const p = DATA.pairs[0], byKey = new Map(EC.map((z) => [z.ns + "," + z.ew, z]));
+      ecMap.setAttribute("viewBox", `0 0 ${p.width} ${p.height}`);
+      const g = el("g", {}, ecMap), zoneEls = [];
+      p.cells.forEach((c) => {
+        const z = byKey.get(c.ns + "," + c.ew);
+        if (!z) return;
+        const path = el("path", { d: c.d, class: "zone", "fill-rule": "evenodd",
+          fill: margin(z) > 0 ? "var(--shield-blue)" : "var(--shield-red)",
+          "fill-opacity": (0.35 + 0.65 * clamp(Math.abs(margin(z)) / 0.4)).toFixed(2) }, g);
+        path.zone = z;
+        zoneEls.push(path);
+      });
+      el("path", { d: p.outline, fill: "none", stroke: "var(--muted)", "stroke-width": "0.8", "stroke-linejoin": "round" }, ecMap);
+      EC.forEach((z) => { el("text", { x: z.x, y: z.y, class: "ev" }, ecMap).textContent = z.ev; });
+      const show = (e) => {
+        const z = e.target.zone;
+        if (!z) return;
+        zoneEls.forEach((p) => { p.classList.toggle("hl", p.zone === z); if (p.zone === z) p.parentNode.appendChild(p); });
+        $("#ec-readout").textContent = `${zoneName(z)} · ${(z.pop / 1e6).toFixed(1)}M people · ${z.ev} electoral votes · ${lead(z)}`;
+      };
+      ecMap.addEventListener("pointerover", show);
+      ecMap.addEventListener("pointerdown", show);
+      ecMap.addEventListener("pointerleave", () => zoneEls.forEach((p) => p.classList.remove("hl")));
+      const ev = { D: 0, R: 0 };
+      EC.forEach((z) => { ev[margin(z) > 0 ? "D" : "R"] += z.ev; });
+      const total = ev.D + ev.R;
+      $("#ec-score").innerHTML = `<span class="d">D ${ev.D}</span>&nbsp;·&nbsp;<span class="r">R ${ev.R}</span>`;
+      $("#ec-bar-d").style.width = (100 * ev.D / total) + "%";
+      $("#ec-bar-r").style.width = (100 * ev.R / total) + "%";
+      built = true;
+    }
+    function toggleEC(show) {
+      if (show && !built) buildEC();
+      ecBox.hidden = !show;
+      if (show) ecBox.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    }
+    let typed = "";
+    document.addEventListener("keydown", (e) => {
+      if (e.target.closest && e.target.closest("input, textarea, select")) return;
+      if (e.key === "Escape" && !ecBox.hidden) { toggleEC(false); return; }
+      typed = (typed + e.key).slice(-3);
+      if (typed === "538") toggleEC(ecBox.hidden);
+    });
+    $("header svg").addEventListener("click", () => toggleEC(ecBox.hidden));
+    $("#ec-close").addEventListener("click", () => toggleEC(false));
+  }
 
   // ---------- boot ----------
   if (reduceMotion) { $("#fade").value = 0; $("#fade-val").textContent = "0.0 s"; }

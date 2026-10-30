@@ -9,7 +9,9 @@ import sys
 from pathlib import Path
 
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import Point
+from shapely.ops import polylabel
 
 import bivariate as bv
 from selection import PREFIX, SELECTIONS
@@ -19,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "processed"
 WEB = ROOT / "web"
 OUT = ROOT / "output" / "web" / "interstate_palettes.html"
+ELECTORAL = ROOT / "results" / "electoral_x5_odd__x10.csv"  # from electoral.py (the Easter egg)
 
 PAIRS = [("x5_odd", "x10", "Major routes", "I-5 … I-95 (odd, ÷5) × I-10 … I-90 (÷10)"),
          ("odd", "even", "All Interstates", "every odd × every even 1–2 digit Interstate")]
@@ -58,6 +61,7 @@ def pair_data(ns, ew, label, desc, outline, roads):
     cu = bv.center_value(bv.routes_for(ns, roads), center, "x")[0]
     cv = bv.center_value(bv.routes_for(ew, roads), center, "y")[0]
     cx, cy = m.xy(center.x, center.y)
+    extra = dict(electoral=electoral_data(m, combo)) if (ns, ew) == ("x5_odd", "x10") and ELECTORAL.exists() else {}
     return dict(
         id=f"{ns}__{ew}", label=label, desc=desc,
         prefix=[PREFIX[SELECTIONS[ns]["level"]], PREFIX[SELECTIONS[ew]["level"]]],
@@ -68,8 +72,23 @@ def pair_data(ns, ew, label, desc, outline, roads):
         outline=m.area_d(outline.geometry.iloc[0]),
         routes_ns=m.line_d(bv.routes_for(ns, roads).geometry),
         routes_ew=m.line_d(bv.routes_for(ew, roads).geometry),
-        cells=cells,
+        cells=cells, **extra,
     ), combo
+
+
+def electoral_data(m, combo):
+    """Per-zone population, electoral votes and 2024 votes, with a label point in map pixels."""
+    z = pd.read_csv(ELECTORAL)
+    out = []
+    for _, r in z.iterrows():
+        geom = combo[(combo.ns == r.ns) & (combo.ew == r.ew)].geometry.union_all()
+        biggest = max(getattr(geom, "geoms", [geom]), key=lambda g: g.area)
+        pt = polylabel(biggest, tolerance=1000)
+        x, y = m.xy(pt.x, pt.y)
+        out.append(dict(ns=int(r.ns), ew=int(r.ew), pop=int(r.population), ev=int(r.ev),
+                        r=int(r.votes_gop), d=int(r.votes_dem), t=int(r.total_votes),
+                        x=round(x, 1), y=round(y, 1)))
+    return out
 
 
 def main():
