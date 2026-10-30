@@ -63,7 +63,6 @@ For bivariate maps, the north–south and east–west region layers are intersec
 - pick, edit and save palettes;
 - fade automatically through all of them, or blend any two by hand;
 - view the major-route and all-Interstate maps on their own or side by side.
-- hover or tap a region to read its two route numbers and trace both routes along their full length.
 
 "Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
 

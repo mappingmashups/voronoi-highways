@@ -405,7 +405,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     const legend = el("svg", { class: "legend", "aria-label": "Colour legend: north–south route across, east–west route up" }, wrap);
     card.append(label, svg, note, wrap);
     const v = { pairIdx, pair: p, card, svg, legend, note, cellEls: [], legendEls: [], legendIndex: new Map(),
-                routeEls: [], routeByKey: null, routeHl: null, centerEl: null, shown: null };
+                routeEls: [], centerEl: null, shown: null };
     buildMap(v); buildLegend(v);
     const onCell = (e) => { const i = e.target.dataset && e.target.dataset.i; if (i !== undefined) showReadout(v, +i); };
     svg.addEventListener("pointerover", onCell);
@@ -427,16 +427,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     });
     el("path", { d: p.outline, fill: "none", stroke: "var(--muted)", "stroke-width": "0.8", "stroke-linejoin": "round" }, v.svg);
     const rg = el("g", { fill: "none", "stroke-width": "0.9", "stroke-linecap": "round", "stroke-linejoin": "round" }, v.svg);
-    v.routeEls = [];
-    v.routeByKey = new Map();  // "ns:5" / "ew:80" -> path
-    for (const axis of ["ns", "ew"]) {
-      for (const [n, d] of Object.entries(p["routes_" + axis])) {
-        const path = el("path", { d }, rg);
-        v.routeEls.push(path);
-        v.routeByKey.set(axis + ":" + n, path);
-      }
-    }
-    v.routeHl = el("g", { fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", "pointer-events": "none" }, v.svg);
+    v.routeEls = [el("path", { d: p.routes_ns }, rg), el("path", { d: p.routes_ew }, rg)];
     v.centerEl = el("g", {}, v.svg);
     el("circle", { cx: p.center.x, cy: p.center.y, r: 5, fill: "#fff", stroke: "#111", "stroke-width": 1.6 }, v.centerEl);
     el("circle", { cx: p.center.x, cy: p.center.y, r: 1.6, fill: "#111" }, v.centerEl);
@@ -539,21 +530,11 @@ const DATA = /*__PALETTE_DATA__*/null;
   function highlight(key) {
     hlEls.forEach((e) => e.classList.remove("hl"));
     hlEls = [];
-    views.forEach((v) => v.routeHl.replaceChildren());
     if (!key) return;
-    const [ns, ew] = key.split(",");
     for (const v of views) {  // the same route pair is highlighted on every map that has it
       v.pair.cells.forEach((c, i) => { if (c.ns + "," + c.ew === key) hlEls.push(v.cellEls[i]); });
       const li = v.legendIndex.get(key);
       if (li !== undefined) hlEls.push(v.legendEls[li].el);
-      // the full length of both routes, dark on a white casing so it shows on any palette
-      for (const k of ["ns:" + ns, "ew:" + ew]) {
-        const route = v.routeByKey.get(k);
-        if (!route) continue;
-        const d = route.getAttribute("d");
-        el("path", { d, stroke: "#fff", "stroke-opacity": 0.9, "stroke-width": 4.6 }, v.routeHl);
-        el("path", { d, stroke: "#111", "stroke-width": 2.2 }, v.routeHl);
-      }
     }
     hlEls.forEach((e) => e.classList.add("hl"));
   }
