@@ -1,0 +1,783 @@
+<title>Interstate Palette Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&family=Overpass+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: map-first workbench. Map + legend on the left, a control rail on the right; one column on phones. */
+:root {
+  --bg: #eef2ef;          /* cool grey with a hint of guide-sign green */
+  --surface: #ffffff;
+  --ink: #16201b;
+  --muted: #56635c;
+  --line: #d3dbd6;
+  --accent: #1c6b42;      /* US guide-sign green */
+  --accent-ink: #ffffff;
+  --shield-blue: #1d4f9c;
+  --shield-red: #c41e3a;
+  --map-water: #e3e9e5;
+  --font-ui: "Overpass", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Overpass Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111613; --surface: #1a211d; --ink: #e6eee9; --muted: #9aa8a0; --line: #2d3832;
+    --accent: #52c285; --accent-ink: #0c130f; --shield-blue: #4f7fd0; --shield-red: #e0526a;
+    --map-water: #161d19; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111613; --surface: #1a211d; --ink: #e6eee9; --muted: #9aa8a0; --line: #2d3832;
+  --accent: #52c285; --accent-ink: #0c130f; --shield-blue: #4f7fd0; --shield-red: #e0526a;
+  --map-water: #161d19; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-ui); font-size: 15px; line-height: 1.45;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 1440px; margin: 0 auto; display: grid; gap: 20px; }
+
+header { display: flex; gap: 14px; align-items: center; }
+header svg { flex: none; width: 44px; height: 46px; }
+h1 { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.15rem); font-weight: 800; margin: 0; letter-spacing: -0.01em; line-height: 1.1; text-wrap: balance; }
+.lede { margin: 2px 0 0; color: var(--muted); max-width: 70ch; }
+
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .work { grid-template-columns: minmax(0, 1fr); } }
+
+.stage { display: grid; gap: 12px; min-width: 0; }
+@media (min-width: 961px) { .stage:not(.both) { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); } }
+.views { display: grid; gap: 12px; min-width: 0; }
+.stage.both .views { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); align-items: start; }
+.view-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 800; }
+.view-label span { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.map-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.map-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+.now { font-weight: 800; font-size: 1.1rem; }
+.now-sub { color: var(--muted); font-size: 0.86rem; }
+.map { width: 100%; height: auto; display: block; touch-action: manipulation; }
+.map .cell { cursor: crosshair; }
+.map .cell.hl { stroke: var(--ink) !important; stroke-width: 2.2 !important; }
+.readout { display: flex; gap: 10px; align-items: center; min-height: 28px; font-family: var(--font-mono); font-size: 0.9rem; flex-wrap: wrap; }
+.chip { display: inline-block; width: 18px; height: 18px; border-radius: 3px; border: 1px solid var(--line); vertical-align: middle; }
+.hint { color: var(--muted); font-family: var(--font-ui); }
+
+.legend-wrap { overflow-x: auto; }
+.legend { display: block; max-width: 100%; height: auto; }
+.legend text { fill: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+.legend .sq.hl { stroke: var(--ink); stroke-width: 2; }
+.axis-note { color: var(--muted); font-size: 0.82rem; }
+
+aside { display: grid; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.panel h2 { margin: 0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 800; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row > label { color: var(--muted); font-size: 0.86rem; }
+.note { color: var(--muted); font-size: 0.84rem; margin: 0; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.seg button { border: 0; border-right: 1px solid var(--line); border-radius: 0; background: transparent; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+button, select, input[type="text"] {
+  font: inherit; font-size: 0.88rem; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 10px; min-height: 34px;
+}
+button { cursor: pointer; font-weight: 600; }
+button:hover { border-color: var(--muted); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type="range"] { accent-color: var(--accent); flex: 1 1 140px; min-width: 0; }
+.val { font-family: var(--font-mono); font-size: 0.82rem; min-width: 5.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.preset { display: grid; gap: 4px; padding: 6px; text-align: left; font-weight: 600; font-size: 0.76rem; line-height: 1.2; position: relative; }
+.preset canvas { width: 100%; height: auto; aspect-ratio: 3 / 2; border-radius: 3px; display: block; }
+.preset[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.preset .del { position: absolute; top: 2px; right: 2px; min-height: 0; padding: 0 6px; font-size: 0.8rem; line-height: 1.4; }
+
+.progress { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.progress > div { height: 100%; width: 0; background: var(--accent); }
+
+.editor-grid { display: grid; gap: 6px; }
+.editor-grid input[type="color"] { width: 100%; height: 40px; padding: 2px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); cursor: pointer; }
+.compass-labels { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: ". n ." "w g e" ". s ."; gap: 6px; align-items: center; }
+.compass-labels .n, .compass-labels .s { text-align: center; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.compass-labels .n { grid-area: n; }
+.compass-labels .s { grid-area: s; }
+.compass-labels .editor-grid { grid-area: g; }
+.compass-labels .w, .compass-labels .e { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; writing-mode: vertical-rl; }
+.compass-labels .w { grid-area: w; transform: rotate(180deg); }
+.compass-labels .e { grid-area: e; }
+textarea { width: 100%; min-height: 90px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; }
+.toast { color: var(--accent); font-size: 0.84rem; min-height: 1.2em; margin: 0; }
+footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="page">
+  <header>
+    <svg viewBox="0 0 44 46" aria-hidden="true">
+      <path d="M4 4 C14 0 30 0 40 4 C44 18 42 34 22 44 C2 34 0 18 4 4 Z" fill="var(--shield-blue)" stroke="var(--surface)" stroke-width="2"/>
+      <path d="M4.6 4.2 C14 0.6 30 0.6 39.4 4.2 L40.4 13 L3.6 13 Z" fill="var(--shield-red)"/>
+      <text x="22" y="34" text-anchor="middle" font-family="Overpass, Arial, sans-serif" font-weight="800" font-size="17" fill="#fff">×</text>
+    </svg>
+    <div>
+      <h1>Interstate Palette Lab</h1>
+      <p class="lede">Every point in the lower 48 is coloured by its nearest north–south (odd) and nearest east–west (even) Interstate. Pick a palette, build your own, or let the map drift through all of them.</p>
+    </div>
+  </header>
+
+  <div class="work">
+    <div class="stage" id="stage">
+      <div class="map-card">
+        <div class="map-head">
+          <div>
+            <div class="now" id="now-name">Blue × yellow</div>
+            <div class="now-sub" id="now-title"></div>
+          </div>
+          <div class="seg" role="group" aria-label="Route network">
+            <button type="button" id="mode-major" aria-pressed="true">Major routes</button>
+            <button type="button" id="mode-all" aria-pressed="false">All Interstates</button>
+            <button type="button" id="mode-both" aria-pressed="false">Both</button>
+          </div>
+        </div>
+        <div class="readout" id="readout" aria-live="polite"><span class="hint">Hover or tap a map to read a region’s two route numbers.</span></div>
+      </div>
+      <div class="views" id="views"></div>
+    </div>
+
+    <aside>
+      <section class="panel" aria-labelledby="h-presets">
+        <h2 id="h-presets">Palettes</h2>
+        <div class="presets" id="presets"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-tour">
+        <h2 id="h-tour">Transitions</h2>
+        <div class="row">
+          <button type="button" class="primary" id="tour-btn">Play through all</button>
+          <span class="note" id="tour-status">Fades from palette to palette in order.</span>
+        </div>
+        <div class="progress" aria-hidden="true"><div id="tour-progress"></div></div>
+        <div class="row"><label for="hold">Hold</label><input type="range" id="hold" min="0.5" max="8" step="0.5" value="2"><span class="val" id="hold-val">2.0 s</span></div>
+        <div class="row"><label for="fade">Fade</label><input type="range" id="fade" min="0" max="5" step="0.1" value="1.6"><span class="val" id="fade-val">1.6 s</span></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:2px 0;width:100%">
+        <p class="note">Or blend any two by hand:</p>
+        <div class="row">
+          <select id="blend-a" aria-label="Blend from"></select>
+          <span class="note">→</span>
+          <select id="blend-b" aria-label="Blend to"></select>
+        </div>
+        <div class="row"><label for="blend">Mix</label><input type="range" id="blend" min="0" max="1" step="0.005" value="0"><span class="val" id="blend-val">0%</span></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-edit">
+        <h2 id="h-edit">Your palette</h2>
+        <p class="note" id="edit-note">Change any colour to make a custom palette. Rows run north (top) to south; columns west to east.</p>
+        <div class="row">
+          <label for="cols">Columns</label>
+          <select id="cols"><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          <label for="rows">Rows</label>
+          <select id="rows"><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </div>
+        <div class="compass-labels">
+          <span class="n">North · high even numbers</span>
+          <span class="w">West</span>
+          <div class="editor-grid" id="editor-grid"></div>
+          <span class="e">East</span>
+          <span class="s">South · low even numbers</span>
+        </div>
+        <div class="row">
+          <label for="center-mode">Middle of the grid</label>
+          <select id="center-mode">
+            <option value="even">Middle of the numbers (50)</option>
+            <option value="geo">Geographic centre</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div id="custom-center" hidden>
+          <div class="row"><label for="cu">West–east</label><input type="range" id="cu" min="0.05" max="0.95" step="0.005" value="0.5"><span class="val" id="cu-val"></span></div>
+          <div class="row"><label for="cv">South–north</label><input type="range" id="cv" min="0.05" max="0.95" step="0.005" value="0.5"><span class="val" id="cv-val"></span></div>
+        </div>
+        <div class="row">
+          <label for="routes-mode">Route lines</label>
+          <select id="routes-mode">
+            <option value="auto">Match palette</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="off">Hidden</option>
+          </select>
+          <label><input type="checkbox" id="show-center" checked> Mark centre</label>
+        </div>
+        <div class="row">
+          <input type="text" id="save-name" placeholder="Name this palette" aria-label="Palette name" style="flex:1 1 140px;min-width:0">
+          <button type="button" id="save-btn">Save</button>
+        </div>
+        <div class="row">
+          <button type="button" id="copy-py">Copy for bivariate.py</button>
+          <button type="button" id="copy-svg">Copy map SVG</button>
+        </div>
+        <p class="toast" id="toast" role="status"></p>
+        <textarea id="fallback" hidden readonly aria-label="Copy this text"></textarea>
+      </section>
+    </aside>
+  </div>
+  <footer>Regions are nearest-route Voronoi cells built from Natural Earth 1:10m roads (with label fixes), measured in Conus Albers. Route numbers map onto a fixed 0–100 scale on both axes, so colours stay comparable between the two networks. Saved palettes stay in this browser only.</footer>
+</div>
+
+<script>
+const DATA = /*__PALETTE_DATA__*/null;
+</script>
+<script>
+(() => {
+  "use strict";
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const $ = (s) => document.querySelector(s);
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- colour maths (mirrors scripts/colorspace.py and scripts/bivariate.py) ----------
+  const hexToRgb = (h) => { h = h.replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
+  const rgbToHex = (rgb) => "#" + rgb.map((c) => Math.round(clamp(c) * 255).toString(16).padStart(2, "0")).join("");
+  const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const toSrgb = (c) => { c = clamp(c); return c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055; };
+  function rgbToOklab(rgb) {
+    const [r, g, b] = rgb.map(toLinear);
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+            1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+            0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+  }
+  function oklabToRgb([L, a, b]) {
+    const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+    const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+    const s = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3;
+    return [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+            -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s].map(toSrgb);
+  }
+  const hexToLab = (h) => rgbToOklab(hexToRgb(h));
+  const labToHex = (lab) => rgbToHex(oklabToRgb(lab));
+  const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  function hlsToRgb(h, l, s) {
+    const v = (m1, m2, hue) => {
+      hue = ((hue % 1) + 1) % 1;
+      if (hue < 1 / 6) return m1 + (m2 - m1) * hue * 6;
+      if (hue < 0.5) return m2;
+      if (hue < 2 / 3) return m1 + (m2 - m1) * (2 / 3 - hue) * 6;
+      return m1;
+    };
+    if (s === 0) return [l, l, l];
+    const m2 = l <= 0.5 ? l * (1 + s) : l + s - l * s, m1 = 2 * l - m2;
+    return [v(m1, m2, h + 1 / 3), v(m1, m2, h), v(m1, m2, h - 1 / 3)];
+  }
+
+  const norm = (n) => clamp((n - DATA.scale[0]) / (DATA.scale[1] - DATA.scale[0]));
+  // stop positions for n control colours, bent so the middle lands at c (c = 0.5 gives even spacing)
+  const warp = (t, c) => (t <= 0.5 ? (t / 0.5) * c : c + ((t - 0.5) / 0.5) * (1 - c));
+  const stopsFor = (n, c) => Array.from({ length: n }, (_, i) => warp(i / (n - 1), c));
+
+  function centerOf(spec, pair) {
+    if (spec.center === "geo") return [pair.center.u, pair.center.v];
+    if (spec.center && typeof spec.center === "object") return [spec.center.u, spec.center.v];
+    return [0.5, 0.5];
+  }
+
+  // spec -> (u, v) -> "#rrggbb"
+  function makeFn(spec, pair) {
+    if (spec.kind === "grid") {
+      const lab = spec.rows.map((r) => r.map(hexToLab));
+      const nr = lab.length, nc = lab[0].length;
+      const [cu, cv] = centerOf(spec, pair);
+      const xs = stopsFor(nc, cu), ys = stopsFor(nr, cv);
+      const seg = (arr, x) => { let i = 0; for (let k = 0; k < arr.length; k++) if (arr[k] <= x) i = k; return Math.min(Math.max(i, 0), arr.length - 2); };
+      return (u, v) => {
+        const i = seg(xs, u), j = seg(ys, v);
+        const tx = (u - xs[i]) / (xs[i + 1] - xs[i]), ty = (v - ys[j]) / (ys[j + 1] - ys[j]);
+        const c = [0, 1, 2].map((k) => lab[j][i][k] * (1 - tx) * (1 - ty) + lab[j][i + 1][k] * tx * (1 - ty)
+                                      + lab[j + 1][i][k] * (1 - tx) * ty + lab[j + 1][i + 1][k] * tx * ty);
+        return labToHex(c);
+      };
+    }
+    if (spec.kind === "multiply") {
+      const a = hexToRgb(spec.ew), b = hexToRgb(spec.ns);
+      return (u, v) => rgbToHex([0, 1, 2].map((k) => (1 - v * (1 - a[k])) * (1 - u * (1 - b[k]))));
+    }
+    if (spec.kind === "plane") {
+      return (u, v) => labToHex([spec.lightness, (2 * u - 1) * spec.chroma, (2 * v - 1) * spec.chroma]);
+    }
+    if (spec.kind === "hue_lightness") {
+      return (u, v) => rgbToHex(hlsToRgb((u * 285) / 360, 0.88 - 0.48 * v, 0.8));
+    }
+    throw new Error("Unknown palette kind: " + spec.kind);
+  }
+
+  // ---------- state ----------
+  const STORE_KEY = "interstate-palette-lab.saved";
+  const loadSaved = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch { return []; } };
+  const storeSaved = (list) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch { /* storage unavailable */ } };
+
+  const state = {
+    mode: "major",                  // which maps are shown: major, all or both
+    active: DATA.presets[0].id,     // preset id, saved id, or "custom"
+    custom: null,                   // spec of the editor's palette
+    saved: loadSaved(),
+    routesMode: "auto",
+    showCenter: true,
+    anim: null,
+    tour: { playing: false, timer: null, index: 0 },
+  };
+  const pair = () => views[0].pair;   // the first map shown: drives thumbnails and the editor's centre labels
+  const allPalettes = () => [...DATA.presets, ...state.saved];
+  const paletteById = (id) => (id === "custom" ? { id: "custom", name: "Custom", title: "Your palette", spec: state.custom, routes: "dark" } : allPalettes().find((p) => p.id === id));
+
+  // ---------- map views (one map, or both networks side by side) ----------
+  const MODES = { major: [0], all: [1], both: [0, 1] };
+  let views = [];
+
+  function el(name, attrs, parent) {
+    const e = document.createElementNS(SVGNS, name);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  function makeView(pairIdx) {
+    const p = DATA.pairs[pairIdx];
+    const card = document.createElement("div");
+    card.className = "map-card";
+    const label = document.createElement("div");
+    label.className = "view-label";
+    const desc = document.createElement("span");
+    desc.textContent = " · " + p.desc;
+    label.append(p.label, desc);
+    const svg = el("svg", { class: "map", role: "img", "aria-label": `${p.label}: the lower 48 coloured by nearest Interstate pair` });
+    const note = document.createElement("div");
+    note.className = "axis-note";
+    const wrap = document.createElement("div");
+    wrap.className = "legend-wrap";
+    const legend = el("svg", { class: "legend", "aria-label": "Colour legend: north–south route across, east–west route up" }, wrap);
+    card.append(label, svg, note, wrap);
+    const v = { pairIdx, pair: p, card, svg, legend, note, cellEls: [], legendEls: [], legendIndex: new Map(),
+                routeEls: [], centerEl: null, shown: null };
+    buildMap(v); buildLegend(v);
+    const onCell = (e) => { const i = e.target.dataset && e.target.dataset.i; if (i !== undefined) showReadout(v, +i); };
+    svg.addEventListener("pointerover", onCell);
+    svg.addEventListener("pointerdown", onCell);
+    svg.addEventListener("pointerleave", () => highlight(null));
+    legend.addEventListener("pointerover", (e) => { const k = e.target.dataset && e.target.dataset.key; highlight(k || null); });
+    legend.addEventListener("pointerleave", () => highlight(null));
+    return v;
+  }
+
+  function buildMap(v) {
+    const p = v.pair;
+    v.svg.setAttribute("viewBox", `0 0 ${p.width} ${p.height}`);
+    const cells = el("g", { class: "cells" }, v.svg);
+    v.cellEls = p.cells.map((c, i) => {
+      const path = el("path", { d: c.d, class: "cell", "fill-rule": "evenodd", "stroke-width": "0.4" }, cells);
+      path.dataset.i = i;
+      return path;
+    });
+    el("path", { d: p.outline, fill: "none", stroke: "var(--muted)", "stroke-width": "0.8", "stroke-linejoin": "round" }, v.svg);
+    const rg = el("g", { fill: "none", "stroke-width": "0.9", "stroke-linecap": "round", "stroke-linejoin": "round" }, v.svg);
+    v.routeEls = [el("path", { d: p.routes_ns }, rg), el("path", { d: p.routes_ew }, rg)];
+    v.centerEl = el("g", {}, v.svg);
+    el("circle", { cx: p.center.x, cy: p.center.y, r: 5, fill: "#fff", stroke: "#111", "stroke-width": 1.6 }, v.centerEl);
+    el("circle", { cx: p.center.x, cy: p.center.y, r: 1.6, fill: "#111" }, v.centerEl);
+  }
+
+  function buildLegend(v) {
+    const p = v.pair, nx = p.ns.length, ny = p.ew.length, svg = v.legend;
+    const cell = nx > 12 ? 15 : 24, left = 40, top = 6, bottom = 34;
+    const w = left + nx * cell + 8, h = top + ny * cell + bottom;
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    svg.setAttribute("width", w);
+    const present = new Set(p.cells.map((c) => c.ns + "," + c.ew));
+    p.ew.slice().reverse().forEach((e, j) => {
+      el("text", { x: left - 5, y: top + j * cell + cell * 0.66, "text-anchor": "end" }, svg).textContent = p.prefix[1] + e;
+      p.ns.forEach((n, i) => {
+        const on = present.has(n + "," + e), inset = on ? 0 : Math.floor(cell / 4);
+        const r = el("rect", { x: left + i * cell + inset, y: top + j * cell + inset, width: cell - 2 - 2 * inset, height: cell - 2 - 2 * inset, rx: 1.5, class: "sq" }, svg);
+        r.dataset.key = n + "," + e;
+        v.legendIndex.set(n + "," + e, v.legendEls.length);
+        v.legendEls.push({ el: r, u: norm(n), v: norm(e) });
+      });
+    });
+    p.ns.forEach((n, i) => {
+      if (nx > 12 && i % 2) return; // thin out labels on the big grid
+      el("text", { x: left + i * cell + cell / 2 - 1, y: top + ny * cell + 12, "text-anchor": "middle" }, svg).textContent = n;
+    });
+    el("text", { x: left, y: top + ny * cell + 28 }, svg).textContent = `→ east: north–south route (${p.prefix[0]}${p.ns[0]}…${p.ns[nx - 1]})`;
+    v.note.textContent = `↑ north: east–west route (${p.prefix[1]}${p.ew[0]}…${p.ew[ny - 1]}). Small squares are combinations that don’t occur on this map.`;
+  }
+
+  // colours of a palette for one map, as OKLab arrays (cached per network)
+  const cache = new Map();
+  function coloursFor(pal, v) {
+    const key = v.pairIdx + "|" + pal.id + "|" + JSON.stringify(pal.spec);
+    if (cache.has(key)) return cache.get(key);
+    const fn = makeFn(pal.spec, v.pair);
+    const out = {
+      cells: v.pair.cells.map((c) => hexToLab(fn(norm(c.ns), norm(c.ew)))),
+      legend: v.legendEls.map((l) => hexToLab(fn(l.u, l.v))),
+      routes: routeRgba(pal),
+    };
+    cache.set(key, out);
+    return out;
+  }
+  const targetsFor = (pal) => views.map((v) => coloursFor(pal, v));
+  function routeRgba(pal) {
+    const mode = state.routesMode === "auto" ? pal.routes : state.routesMode;
+    if (mode === "off") return [0.2, 0.2, 0.2, 0];
+    return mode === "light" ? [1, 1, 1, 0.6] : [0.17, 0.19, 0.18, 0.7];
+  }
+
+  function paintView(v, shown) {
+    v.shown = shown;
+    shown.cells.forEach((lab, i) => { const h = labToHex(lab); v.cellEls[i].setAttribute("fill", h); v.cellEls[i].setAttribute("stroke", h); });
+    shown.legend.forEach((lab, i) => v.legendEls[i].el.setAttribute("fill", labToHex(lab)));
+    const [r, g, b, a] = shown.routes;
+    v.routeEls.forEach((e) => { e.setAttribute("stroke", rgbToHex([r, g, b])); e.setAttribute("stroke-opacity", a.toFixed(3)); });
+  }
+  const paintAll = (list) => views.forEach((v, i) => paintView(v, list[i]));
+  function mix(a, b, t) {
+    return {
+      cells: a.cells.map((x, i) => lerp3(x, b.cells[i], t)),
+      legend: a.legend.map((x, i) => lerp3(x, b.legend[i], t)),
+      routes: a.routes.map((x, i) => x + (b.routes[i] - x) * t),
+    };
+  }
+  const mixAll = (as, bs, t) => as.map((a, i) => mix(a, bs[i], t));
+
+  function animateTo(targets, seconds, done) {
+    if (state.anim) cancelAnimationFrame(state.anim.raf);
+    const from = views.map((v) => v.shown);
+    if (seconds <= 0 || from.some((f) => !f)) { paintAll(targets); state.anim = null; done && done(); return; }
+    const t0 = performance.now(), dur = seconds * 1000;
+    const step = (now) => {
+      const t = clamp((now - t0) / dur), e = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2; // ease in-out
+      paintAll(mixAll(from, targets, e));
+      if (t < 1) state.anim.raf = requestAnimationFrame(step); else { state.anim = null; done && done(); }
+    };
+    state.anim = { raf: requestAnimationFrame(step) };
+  }
+
+  // ---------- header / readout ----------
+  function setNow(pal, extra) {
+    $("#now-name").textContent = extra || pal.name;
+    let sub = pal.title || "";
+    if (pal.spec && pal.spec.kind === "grid" && pal.spec.center === "geo") {
+      const at = views.map((v) => `${v.pair.prefix[0]}${v.pair.center.ns} × ${v.pair.prefix[1]}${v.pair.center.ew}` + (views.length > 1 ? ` (${v.pair.label.toLowerCase()})` : ""));
+      sub += `. Centre falls at ${at.join(" and ")}.`;
+    }
+    $("#now-title").textContent = sub;
+  }
+  function updateCenterMarker(pal) {
+    // the marker shows the geographic centre, so only when the palette is centred on it
+    const spec = pal && pal.spec;
+    const geo = spec && spec.kind === "grid" && spec.center === "geo";
+    views.forEach((v) => (v.centerEl.style.display = state.showCenter && geo ? "" : "none"));
+  }
+
+  let hlEls = [];
+  function highlight(key) {
+    hlEls.forEach((e) => e.classList.remove("hl"));
+    hlEls = [];
+    if (!key) return;
+    for (const v of views) {  // the same route pair is highlighted on every map that has it
+      v.pair.cells.forEach((c, i) => { if (c.ns + "," + c.ew === key) hlEls.push(v.cellEls[i]); });
+      const li = v.legendIndex.get(key);
+      if (li !== undefined) hlEls.push(v.legendEls[li].el);
+    }
+    hlEls.forEach((e) => e.classList.add("hl"));
+  }
+  function showReadout(v, i) {
+    const p = v.pair, c = p.cells[i], hex = labToHex(v.shown.cells[i]);
+    const out = $("#readout");
+    out.innerHTML = "";
+    const chip = document.createElement("span"); chip.className = "chip"; chip.style.background = hex;
+    const t = document.createElement("span"); t.textContent = `${p.prefix[0]}${c.ns} × ${p.prefix[1]}${c.ew}`;
+    const hx = document.createElement("span"); hx.className = "hint"; hx.textContent = hex + (views.length > 1 ? ` · ${p.label}` : "");
+    out.append(chip, t, hx);
+    highlight(c.ns + "," + c.ew);
+  }
+
+  // ---------- presets ----------
+  function thumb(canvas, pal) {
+    const fn = makeFn(pal.spec, pair()), ctx = canvas.getContext("2d");
+    const W = 30, H = 20;
+    canvas.width = W; canvas.height = H;
+    const img = ctx.createImageData(W, H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const rgb = hexToRgb(fn(x / (W - 1), 1 - y / (H - 1))), k = (y * W + x) * 4;
+      img.data[k] = rgb[0] * 255; img.data[k + 1] = rgb[1] * 255; img.data[k + 2] = rgb[2] * 255; img.data[k + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function buildPresets() {
+    const box = $("#presets");
+    box.innerHTML = "";
+    allPalettes().forEach((pal) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "preset"; b.dataset.id = pal.id;
+      b.setAttribute("aria-pressed", String(pal.id === state.active));
+      b.title = pal.title || pal.name;
+      const c = document.createElement("canvas"); thumb(c, pal);
+      const n = document.createElement("span"); n.textContent = pal.name;
+      b.append(c, n);
+      if (pal.saved) {
+        const d = document.createElement("span");
+        d.className = "del"; d.textContent = "×"; d.setAttribute("role", "button"); d.setAttribute("aria-label", "Delete " + pal.name); d.tabIndex = 0;
+        d.addEventListener("click", (ev) => { ev.stopPropagation(); deleteSaved(pal.id); });
+        b.append(d);
+      }
+      b.addEventListener("click", () => { stopTour(); choose(pal.id, true); });
+      box.append(b);
+    });
+    fillBlendSelects();
+  }
+  function markActive() {
+    document.querySelectorAll(".preset").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.id === state.active)));
+  }
+
+  function choose(id, animate, loadEditorToo = true) {
+    state.active = id;
+    const pal = paletteById(id);
+    markActive();
+    setNow(pal);
+    updateCenterMarker(pal);
+    if (loadEditorToo && id !== "custom") loadEditor(pal);
+    animateTo(targetsFor(pal), animate ? fadeSeconds() : 0);
+  }
+
+  // ---------- tour + blend ----------
+  const holdSeconds = () => +$("#hold").value;
+  const fadeSeconds = () => +$("#fade").value;
+  function tourList() { return allPalettes(); }
+  function startTour() {
+    state.tour.playing = true;
+    $("#tour-btn").textContent = "Pause";
+    const list = tourList();
+    let i = Math.max(0, list.findIndex((p) => p.id === state.active));
+    const next = () => {
+      if (!state.tour.playing) return;
+      const cur = list[i], nxt = list[(i + 1) % list.length];
+      $("#tour-status").textContent = `${cur.name} → ${nxt.name}`;
+      const hold = holdSeconds() * 1000, t0 = performance.now();
+      const tick = () => {
+        if (!state.tour.playing) return;
+        const t = clamp((performance.now() - t0) / hold);
+        $("#tour-progress").style.width = (t * 100).toFixed(1) + "%";
+        if (t < 1) { state.tour.timer = requestAnimationFrame(tick); return; }
+        i = (i + 1) % list.length;
+        state.active = nxt.id; markActive(); setNow(nxt); updateCenterMarker(nxt);
+        animateTo(targetsFor(nxt), fadeSeconds(), () => { loadEditor(nxt); next(); });
+      };
+      state.tour.timer = requestAnimationFrame(tick);
+    };
+    next();
+  }
+  function stopTour() {
+    if (!state.tour.playing) return;
+    state.tour.playing = false;
+    cancelAnimationFrame(state.tour.timer);
+    $("#tour-btn").textContent = "Play through all";
+    $("#tour-status").textContent = "Paused.";
+    $("#tour-progress").style.width = "0";
+  }
+  $("#tour-btn").addEventListener("click", () => (state.tour.playing ? stopTour() : startTour()));
+  for (const id of ["hold", "fade"]) {
+    const upd = () => ($("#" + id + "-val").textContent = (+$("#" + id).value).toFixed(1) + " s");
+    $("#" + id).addEventListener("input", upd); upd();
+  }
+
+  function fillBlendSelects() {
+    const list = allPalettes();
+    for (const [sel, dflt] of [["#blend-a", list[0].id], ["#blend-b", (list.find((p) => p.id === "compass_centered_black") || list[1]).id]]) {
+      const s = $(sel), prev = s.value;
+      s.innerHTML = "";
+      list.forEach((p) => { const o = document.createElement("option"); o.value = p.id; o.textContent = p.name; s.append(o); });
+      s.value = list.some((p) => p.id === prev) ? prev : dflt;
+    }
+  }
+  function applyBlend() {
+    stopTour();
+    const a = paletteById($("#blend-a").value), b = paletteById($("#blend-b").value), t = +$("#blend").value;
+    $("#blend-val").textContent = Math.round(t * 100) + "%";
+    if (state.anim) { cancelAnimationFrame(state.anim.raf); state.anim = null; }
+    paintAll(mixAll(targetsFor(a), targetsFor(b), t));
+    const name = t <= 0 ? a.name : t >= 1 ? b.name : `${a.name} → ${b.name} (${Math.round(t * 100)}%)`;
+    state.active = t <= 0 ? a.id : t >= 1 ? b.id : null;
+    markActive(); setNow(t >= 1 ? b : a, name); updateCenterMarker(t >= 0.5 ? b : a);
+  }
+  ["#blend", "#blend-a", "#blend-b"].forEach((s) => $(s).addEventListener("input", applyBlend));
+
+  // ---------- editor ----------
+  const editor = { rows: null, mode: "even", cu: 0.5, cv: 0.5 };
+  function editorSpec() {
+    const center = editor.mode === "custom" ? { u: editor.cu, v: editor.cv } : editor.mode;
+    return { kind: "grid", rows: editor.rows.map((r) => r.slice()), center };
+  }
+  function sampleToGrid(fn, nr, nc, c) {
+    const xs = stopsFor(nc, c[0]), ys = stopsFor(nr, c[1]);
+    return ys.map((v) => xs.map((u) => fn(u, v)));
+  }
+  function loadEditor(pal) {
+    const spec = pal.spec;
+    if (spec.kind === "grid") {
+      editor.rows = spec.rows.map((r) => r.slice());
+      if (spec.center === "geo" || spec.center === "even") editor.mode = spec.center;
+      else if (spec.center && typeof spec.center === "object") { editor.mode = "custom"; editor.cu = spec.center.u; editor.cv = spec.center.v; }
+      else editor.mode = "even";
+      $("#edit-note").textContent = "Change any colour to make a custom palette. Rows run north (top) to south; columns west to east.";
+    } else {
+      editor.mode = "even";
+      editor.rows = sampleToGrid(makeFn(spec, pair()), 5, 5, [0.5, 0.5]);
+      $("#edit-note").textContent = `“${pal.name}” is a formula, shown here as a 5×5 sample. Editing a colour turns it into a 5×5 grid palette.`;
+    }
+    renderEditor();
+  }
+  function renderEditor() {
+    const nr = editor.rows.length, nc = editor.rows[0].length;
+    $("#rows").value = nr; $("#cols").value = nc;
+    $("#center-mode").value = editor.mode;
+    $("#custom-center").hidden = editor.mode !== "custom";
+    $("#cu").value = editor.cu; $("#cv").value = editor.cv; updateCenterVals();
+    const g = $("#editor-grid");
+    g.style.gridTemplateColumns = `repeat(${nc}, minmax(0, 1fr))`;
+    g.innerHTML = "";
+    const rowName = (j) => (j === nr - 1 ? "north" : j === 0 ? "south" : "middle");
+    const colName = (i) => (i === 0 ? "west" : i === nc - 1 ? "east" : "middle");
+    for (let j = nr - 1; j >= 0; j--) for (let i = 0; i < nc; i++) {
+      const inp = document.createElement("input");
+      inp.type = "color"; inp.value = editor.rows[j][i]; inp.id = `ed-${j}-${i}`;
+      inp.setAttribute("aria-label", `Row ${nr - j} (${rowName(j)}), column ${i + 1} (${colName(i)})`);
+      inp.addEventListener("input", () => { editor.rows[j][i] = inp.value; applyCustom(false); });
+      g.append(inp);
+    }
+  }
+  function applyCustom(animate) {
+    stopTour();
+    state.custom = editorSpec();
+    state.active = "custom";
+    const pal = paletteById("custom");
+    markActive(); setNow(pal, "Custom palette"); updateCenterMarker(pal);
+    animateTo(targetsFor(pal), animate ? Math.min(fadeSeconds(), 0.6) : 0);
+  }
+  function resize() {
+    const nr = +$("#rows").value, nc = +$("#cols").value;
+    const c = editor.mode === "geo" ? [pair().center.u, pair().center.v] : editor.mode === "custom" ? [editor.cu, editor.cv] : [0.5, 0.5];
+    const fn = makeFn(editorSpec(), pair());
+    editor.rows = sampleToGrid(fn, nr, nc, c);
+    renderEditor(); applyCustom(true);
+  }
+  $("#rows").addEventListener("change", resize);
+  $("#cols").addEventListener("change", resize);
+  function updateCenterVals() {
+    const p = pair();
+    $("#cu-val").textContent = p.prefix[0] + (editor.cu * 100).toFixed(1);
+    $("#cv-val").textContent = p.prefix[1] + (editor.cv * 100).toFixed(1);
+  }
+  $("#center-mode").addEventListener("change", () => {
+    editor.mode = $("#center-mode").value;
+    if (editor.mode === "custom" && editor.cu === 0.5 && editor.cv === 0.5) { editor.cu = pair().center.u; editor.cv = pair().center.v; }
+    renderEditor(); applyCustom(true);
+  });
+  for (const k of ["cu", "cv"]) $("#" + k).addEventListener("input", () => { editor[k] = +$("#" + k).value; updateCenterVals(); applyCustom(false); });
+
+  $("#routes-mode").addEventListener("change", () => {
+    state.routesMode = $("#routes-mode").value; cache.clear();
+    const pal = paletteById(state.active || $("#blend-a").value);
+    if (state.active) animateTo(targetsFor(pal), 0); else applyBlend();
+  });
+  $("#show-center").addEventListener("change", () => { state.showCenter = $("#show-center").checked; updateCenterMarker(paletteById(state.active || "custom")); });
+
+  // ---------- save / copy ----------
+  function toast(msg) { $("#toast").textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => ($("#toast").textContent = ""), 3500); }
+  $("#save-btn").addEventListener("click", () => {
+    const name = $("#save-name").value.trim() || `My palette ${state.saved.length + 1}`;
+    const id = "saved-" + Date.now().toString(36);
+    state.saved.push({ id, name, title: "Saved palette", spec: editorSpec(), routes: "dark", saved: true });
+    storeSaved(state.saved);
+    $("#save-name").value = "";
+    state.active = id; buildPresets(); markActive(); setNow(paletteById(id));
+    toast(`Saved “${name}” in this browser.`);
+  });
+  function deleteSaved(id) {
+    const pal = state.saved.find((p) => p.id === id);
+    state.saved = state.saved.filter((p) => p.id !== id);
+    storeSaved(state.saved);
+    if (state.active === id) state.active = "custom";
+    buildPresets(); toast(`Deleted “${pal ? pal.name : "palette"}”.`);
+  }
+  async function copy(text, what) {
+    const fb = $("#fallback");
+    try { await navigator.clipboard.writeText(text); fb.hidden = true; toast(`Copied ${what}.`); }
+    catch { fb.hidden = false; fb.value = text; fb.focus(); fb.select(); toast(`Couldn’t reach the clipboard. The ${what} is selected below; copy it from there.`); }
+  }
+  $("#copy-py").addEventListener("click", () => {
+    const spec = editorSpec(), p = pair();
+    const c = centerOf(spec, p), nr = spec.rows.length, nc = spec.rows[0].length;
+    const xs = stopsFor(nc, c[0]).map((x) => +x.toFixed(4)), ys = stopsFor(nr, c[1]).map((y) => +y.toFixed(4));
+    const rows = spec.rows.map((r) => "[" + r.map((h) => `"${h}"`).join(", ") + "]").join(",\n              ");
+    const name = ($("#save-name").value.trim() || "custom").toLowerCase().replace(/[^a-z0-9]+/g, "_");
+    const geoNote = spec.center === "geo" ? `  # centred on ${p.prefix[0]}${p.center.ns} × ${p.prefix[1]}${p.center.ew} (${p.label})` : "";
+    const text = `# rows south -> north, colours west -> east${geoNote}\n"${name}": dict(fn=grid([${rows}],\n              xs=${JSON.stringify(xs)}, ys=${JSON.stringify(ys)}),\n           title="${name.replace(/_/g, " ")}"),`;
+    copy(text, "Python scheme");
+  });
+  $("#copy-svg").addEventListener("click", () => {
+    // every map on screen, stacked top to bottom in one SVG
+    const gap = 20, w = Math.max(...views.map((v) => v.pair.width));
+    let y = 0;
+    const parts = views.map((v) => {
+      const clone = v.svg.cloneNode(true);
+      clone.removeAttribute("class"); clone.removeAttribute("role");
+      clone.setAttribute("y", y); clone.setAttribute("width", v.pair.width); clone.setAttribute("height", v.pair.height);
+      clone.querySelectorAll(".cell").forEach((e) => { e.removeAttribute("class"); e.removeAttribute("data-i"); });
+      clone.querySelectorAll("[stroke='var(--muted)']").forEach((e) => e.setAttribute("stroke", "#7a7a7a"));
+      y += v.pair.height + gap;
+      return clone.outerHTML;
+    });
+    const h = y - gap;
+    copy(`<svg xmlns="${SVGNS}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${parts.join("")}</svg>`,
+         views.length > 1 ? "SVG of both maps" : "map SVG");
+  });
+
+  // ---------- which maps ----------
+  function setMode(mode) {
+    stopTour();
+    state.mode = mode;
+    for (const m of Object.keys(MODES)) $("#mode-" + m).setAttribute("aria-pressed", String(m === mode));
+    $("#stage").classList.toggle("both", mode === "both");
+    const box = $("#views");
+    box.innerHTML = "";
+    views = MODES[mode].map(makeView);
+    views.forEach((v) => box.append(v.card));
+    buildPresets(); updateCenterVals();
+    $("#readout").innerHTML = '<span class="hint">Hover or tap a map to read a region’s two route numbers.</span>';
+    if (!state.active) { applyBlend(); return; }  // mid-blend: keep the same mix
+    const pal = paletteById(state.active) || DATA.presets[0];
+    setNow(pal); updateCenterMarker(pal);
+    paintAll(targetsFor(pal));
+  }
+  for (const m of Object.keys(MODES)) $("#mode-" + m).addEventListener("click", () => setMode(m));
+
+  // ---------- boot ----------
+  if (reduceMotion) { $("#fade").value = 0; $("#fade-val").textContent = "0.0 s"; }
+  state.custom = DATA.presets[0].spec;
+  setMode("major");
+  loadEditor(DATA.presets[0]);
+  window.__ipl = { makeFn, norm, DATA };  // used by the build-time colour check
+})();
+</script>

@@ -1,0 +1,10 @@
+# downloaded and generated data (rebuild with the scripts; see README)
+data/
+output/
+web/palette_data.json
+web/palette_check.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
