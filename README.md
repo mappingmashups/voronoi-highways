@@ -67,6 +67,28 @@ For bivariate maps, the north–south and east–west region layers are intersec
 
 "Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
 
+The page is published with GitHub Pages at **https://mappingmashups.github.io/voronoi-highways/**, served from `docs/index.html` on `main`. `export_web.py` writes that file too, as a standalone copy with its own `<head>`. It's committed rather than built on GitHub, so after changing schemes, data or the template, rebuild it and commit `docs/index.html`:
+
+```sh
+python scripts/export_web.py --check
+python scripts/check_web.py docs/index.html
+```
+
+`docs/.nojekyll` tells Pages to serve the files as they are, without running Jekyll.
+
+### Easter egg: the Interstate Electoral College
+
+On the palette page, type `538`, click the shield in the header, or open the page with `#538` at the end of its URL to treat the 54 zones of the major-routes map as states and replay the 2024 presidential election. `python scripts/electoral.py` makes the numbers behind it:
+
+- **Population:** Census 2020 block-group centres of population, each counted in the zone it falls in.
+- **Votes:** 2024 county results ([tonmcg/US_County_Level_Election_Results_08-24](https://github.com/tonmcg/US_County_Level_Election_Results_08-24)), shared out within each county by block-group population. Connecticut (planning regions) and DC (wards) are shared out state-wide.
+- **Names:** each zone is named after its largest city, the Natural Earth populated place with the biggest `POP_MAX` inside it (or the nearest one, for two tiny zones with none). The map marks each city with a dot and its name.
+- **Electoral votes:** 2 per zone plus 430 House seats by Huntington–Hill (at least 1 each), for 538 in all. Winner takes all.
+
+It reads the committed polygons in `results/` and writes `results/electoral_x5_odd__x10.csv`. `export_web.py` picks that CSV up if it exists. The result is R 315 – D 223, against the real 312–226.
+
+`results/` holds committed copies of `voronoi_x5_odd`, `voronoi_x10` and `bivariate_x5_odd__x10` (steps 4–5), so the zones can be used without rerunning the pipeline. After a rebuild, refresh them with `cp data/processed/{voronoi_x5_odd,voronoi_x10,bivariate_x5_odd__x10}.geojson results/`.
+
 ## Natural Earth data fixes
 
 Natural Earth stores one route number per road segment, and some segments are mislabelled. `prepare.py` works around this as follows:
@@ -82,8 +104,9 @@ The problems found are written up, with annotated figures, in [docs/natural-eart
 scripts/      pipeline (see above); routes.py = route reconstruction, svgmap.py = SVG/PNG writer,
               colorspace.py = OKLab helpers
 web/          palette page template
+results/      committed zone polygons for the fives map, and the Electoral College CSV
 docs/         Natural Earth issue write-up and figures
 data/, output/  generated, git-ignored
 ```
 
-Data: [Natural Earth](https://www.naturalearthdata.com/), public domain.
+Data: [Natural Earth](https://www.naturalearthdata.com/), public domain. Easter egg: Natural Earth populated places; US Census Bureau 2020 centres of population; 2024 county results compiled by tonmcg.

@@ -2,6 +2,7 @@
 
 Run after `python scripts/export_web.py --check`: opens the built page in Chromium and
 compares every cell's colour for every preset on both route pairs (tolerance: 1/255).
+Usage: python scripts/check_web.py [page.html or URL]   (default: output/web/interstate_palettes.html)
 """
 import json
 import sys
@@ -38,7 +39,8 @@ def main():
         browser = launch_browser(p)
         page = browser.new_page()
         page.on("pageerror", lambda e: errors.append(str(e)))
-        page.goto(PAGE.as_uri())
+        target = sys.argv[1] if len(sys.argv) > 1 else PAGE.as_uri()
+        page.goto(target if "://" in target else Path(target).resolve().as_uri())
         page.wait_for_timeout(500)
         worst = page.evaluate(COMPARE, check)
         browser.close()
