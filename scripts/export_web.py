@@ -66,10 +66,16 @@ def pair_data(ns, ew, label, desc, outline, roads):
                     x=round(cx, 1), y=round(cy, 1)),
         width=m.width, height=m.map_height,
         outline=m.area_d(outline.geometry.iloc[0]),
-        routes_ns=m.line_d(bv.routes_for(ns, roads).geometry),
-        routes_ew=m.line_d(bv.routes_for(ew, roads).geometry),
+        routes_ns=route_paths(m, bv.routes_for(ns, roads)),
+        routes_ew=route_paths(m, bv.routes_for(ew, roads)),
         cells=cells,
     ), combo
+
+
+
+def route_paths(m, routes):
+    """{route number: SVG path}, so the page can pick out single routes."""
+    return {str(int(n)): m.line_d(g.geometry) for n, g in routes.groupby("number")}
 
 
 def main():
