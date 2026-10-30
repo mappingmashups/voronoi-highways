@@ -77,15 +77,15 @@ def pair_data(ns, ew, label, desc, outline, roads):
 
 
 def electoral_data(m, combo):
-    """Per-zone population, electoral votes and 2024 votes, with a label point in map pixels."""
-    z = pd.read_csv(ELECTORAL)
+    """Per-zone largest city, population, electoral votes and 2024 votes, with a label point in map pixels."""
+    z = pd.read_csv(ELECTORAL, keep_default_na=False)
     out = []
     for _, r in z.iterrows():
         geom = combo[(combo.ns == r.ns) & (combo.ew == r.ew)].geometry.union_all()
         biggest = max(getattr(geom, "geoms", [geom]), key=lambda g: g.area)
         pt = polylabel(biggest, tolerance=1000)
         x, y = m.xy(pt.x, pt.y)
-        out.append(dict(ns=int(r.ns), ew=int(r.ew), pop=int(r.population), ev=int(r.ev),
+        out.append(dict(ns=int(r.ns), ew=int(r.ew), city=r.city, pop=int(r.population), ev=int(r.ev),
                         r=int(r.votes_gop), d=int(r.votes_dem), t=int(r.total_votes),
                         x=round(x, 1), y=round(y, 1)))
     return out

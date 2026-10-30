@@ -828,7 +828,7 @@ const DATA = /*__PALETTE_DATA__*/null;
         const z = e.target.zone;
         if (!z) return;
         zoneEls.forEach((p) => { p.classList.toggle("hl", p.zone === z); if (p.zone === z) p.parentNode.appendChild(p); });
-        $("#ec-readout").textContent = `${zoneName(z)} · ${(z.pop / 1e6).toFixed(1)}M people · ${z.ev} electoral votes · ${lead(z)}`;
+        $("#ec-readout").textContent = `${z.city} (${zoneName(z)}) · ${(z.pop / 1e6).toFixed(1)}M people · ${z.ev} electoral votes · ${lead(z)}`;
       };
       ecMap.addEventListener("pointerover", show);
       ecMap.addEventListener("pointerdown", show);
