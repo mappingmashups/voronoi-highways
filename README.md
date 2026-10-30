@@ -66,6 +66,15 @@ For bivariate maps, the north–south and east–west region layers are intersec
 
 "Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
 
+The page is published with GitHub Pages at **https://mappingmashups.github.io/voronoi-highways/**, served from `docs/index.html` on `main`. `export_web.py` writes that file too, as a standalone copy with its own `<head>`. It's committed rather than built on GitHub, so after changing schemes, data or the template, rebuild it and commit `docs/index.html`:
+
+```sh
+python scripts/export_web.py --check
+python scripts/check_web.py docs/index.html
+```
+
+`docs/.nojekyll` tells Pages to serve the files as they are, without running Jekyll.
+
 ### Easter egg: the Interstate Electoral College
 
 On the palette page, type `538`, click the shield in the header, or open the page with `#538` at the end of its URL to treat the 54 zones of the major-routes map as states and replay the 2024 presidential election. `python scripts/electoral.py` makes the numbers behind it:
