@@ -77,7 +77,7 @@ def pair_data(ns, ew, label, desc, outline, roads):
 
 
 def electoral_data(m, combo):
-    """Per-zone largest city, population, electoral votes and 2024 votes, with a label point in map pixels."""
+    """Per-zone largest city, population, electoral votes and 2024 votes, with label and city-dot points in map pixels."""
     z = pd.read_csv(ELECTORAL, keep_default_na=False)
     out = []
     for _, r in z.iterrows():
@@ -85,9 +85,13 @@ def electoral_data(m, combo):
         biggest = max(getattr(geom, "geoms", [geom]), key=lambda g: g.area)
         pt = polylabel(biggest, tolerance=1000)
         x, y = m.xy(pt.x, pt.y)
-        out.append(dict(ns=int(r.ns), ew=int(r.ew), city=r.city, pop=int(r.population), ev=int(r.ev),
-                        r=int(r.votes_gop), d=int(r.votes_dem), t=int(r.total_votes),
-                        x=round(x, 1), y=round(y, 1)))
+        zone = dict(ns=int(r.ns), ew=int(r.ew), city=r.city, pop=int(r.population), ev=int(r.ev),
+                    r=int(r.votes_gop), d=int(r.votes_dem), t=int(r.total_votes),
+                    x=round(x, 1), y=round(y, 1))
+        if r.city_lon != "":  # the city's dot (none for zones named after a place outside them)
+            c = gpd.GeoSeries([Point(float(r.city_lon), float(r.city_lat))], crs=4326).to_crs(CRS).iloc[0]
+            zone["cx"], zone["cy"] = (round(v, 1) for v in m.xy(c.x, c.y))
+        out.append(zone)
     return out
 
 

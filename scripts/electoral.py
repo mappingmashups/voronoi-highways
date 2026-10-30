@@ -96,17 +96,19 @@ def add_votes(bg, path):
 
 
 def largest_cities(path, zones):
-    """'City, State' of the biggest populated place in each zone, keyed by (ns, ew)."""
+    """('City, State', lon, lat) of the biggest populated place in each zone, keyed by (ns, ew).
+    Zones with no place inside get ('near …', None, None)."""
     places = gpd.read_file(path)
     places = places[places.ADM0_A3 == "USA"].to_crs(CRS)
     name = lambda r: " ".join(r.NAME.split()) if "," in r.NAME else f"{r.NAME}, {r.ADM1NAME}"  # "Washington, D.C."
     # nearest zone within 2 km: some points sit just off the clipped shoreline (Detroit, Duluth)
     hit = gpd.sjoin_nearest(places, zones, max_distance=2000).sort_values("POP_MAX", ascending=False)
-    out = {(int(r.ns), int(r.ew)): name(r) for _, r in hit.drop_duplicates(["ns", "ew"]).iterrows()}
+    out = {(int(r.ns), int(r.ew)): (name(r), r.LONGITUDE, r.LATITUDE)
+           for _, r in hit.drop_duplicates(["ns", "ew"]).iterrows()}
     # a few small zones have no place inside: use the nearest one
     for _, z in zones.iterrows():
         if (int(z.ns), int(z.ew)) not in out:
-            out[(int(z.ns), int(z.ew))] = "near " + name(places.loc[places.distance(z.geometry).idxmin()])
+            out[(int(z.ns), int(z.ew))] = ("near " + name(places.loc[places.distance(z.geometry).idxmin()]), None, None)
     return out
 
 
@@ -143,7 +145,8 @@ def main():
     z["ev"] = z.house + 2
     z["winner"] = (z.votes_dem > z.votes_gop).map({True: "D", False: "R"})
     cities = largest_cities(places_path, zones)
-    z.insert(2, "city", [cities[(r.ns, r.ew)] for r in z.itertuples()])
+    z[["city", "city_lon", "city_lat"]] = [cities[(r.ns, r.ew)] for r in z.itertuples()]
+    z = z[["ns", "ew", "city", "city_lon", "city_lat"] + [c for c in z.columns if c not in ("ns", "ew", "city", "city_lon", "city_lat")]]
     for c in ["votes_gop", "votes_dem", "total_votes"]:
         z[c] = z[c].round().astype(int)
     RESULTS.mkdir(exist_ok=True)

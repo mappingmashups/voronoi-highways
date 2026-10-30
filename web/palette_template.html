@@ -131,6 +131,9 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
 .ec .bar .mid { position: absolute; left: 50%; top: -2px; bottom: -2px; border-left: 2px solid var(--ink); }
 .ec .zone { cursor: crosshair; stroke: var(--surface); stroke-width: 0.8; }
 .ec .zone.hl { stroke: var(--ink); stroke-width: 2.2; }
+.ec .city { font-family: var(--font-ui); font-weight: 600; font-size: 11px; fill: #111; pointer-events: none;
+            paint-order: stroke; stroke: rgba(255, 255, 255, 0.85); stroke-width: 3px; stroke-linejoin: round; }
+@media (max-width: 640px) { .ec .city { visibility: hidden; } }  /* too small to read; tap a zone instead */
 .ec .ev { font-family: var(--font-ui); font-weight: 800; font-size: 13px; fill: #fff; text-anchor: middle; dominant-baseline: central; pointer-events: none;
           paint-order: stroke; stroke: rgba(0, 0, 0, 0.45); stroke-width: 2.5px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -823,7 +826,45 @@ const DATA = /*__PALETTE_DATA__*/null;
         zoneEls.push(path);
       });
       el("path", { d: p.outline, fill: "none", stroke: "var(--muted)", "stroke-width": "0.8", "stroke-linejoin": "round" }, ecMap);
-      EC.forEach((z) => { el("text", { x: z.x, y: z.y, class: "ev" }, ecMap).textContent = z.ev; });
+      // Labels, placed greedily so they don't collide (needs the panel visible, for getBBox):
+      // each zone's largest city gets a small black dot, with its name beside, above or below it;
+      // then each zone's electoral votes, at its label point or the nearest free spot inside the zone.
+      const taken = [];
+      const box = (t, pad = 1) => { const b = t.getBBox(); return { x0: b.x - pad, y0: b.y - pad, x1: b.x + b.width + pad, y1: b.y + b.height + pad }; };
+      const free = (b) => b.x0 >= 0 && b.x1 <= p.width && !taken.some((o) => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
+      const cities = EC.filter((z) => z.cx !== undefined).sort((a, b) => b.pop - a.pop);
+      cities.forEach((z) => {
+        el("circle", { cx: z.cx, cy: z.cy, r: 2.6, fill: "#111", stroke: "#fff", "stroke-width": 0.8 }, ecMap);
+        taken.push({ x0: z.cx - 3, y0: z.cy - 3, x1: z.cx + 3, y1: z.cy + 3 });
+      });
+      cities.forEach((z) => {
+        const t = el("text", { class: "city" }, ecMap);
+        t.textContent = z.city.split(",")[0];
+        const spots = [[5, 3.5, "start"], [-5, 3.5, "end"], [0, -6, "middle"], [0, 13, "middle"],
+                       [4, -6, "start"], [4, 13, "start"], [-4, -6, "end"], [-4, 13, "end"],
+                       [0, -16, "middle"], [0, 23, "middle"]];
+        for (const [dx, dy, anchor] of [...spots, spots[0]]) {
+          t.setAttribute("x", z.cx + dx); t.setAttribute("y", z.cy + dy); t.setAttribute("text-anchor", anchor);
+          if (free(box(t))) break;
+        }
+        taken.push(box(t));
+      });
+      const zoneEl = new Map(zoneEls.map((e) => [e.zone, e]));
+      const pt = ecMap.createSVGPoint();
+      const inside = (path, x, y) => { pt.x = x; pt.y = y; return path.isPointInFill(pt); };
+      EC.forEach((z) => {
+        const t = el("text", { class: "ev" }, ecMap), path = zoneEl.get(z);
+        t.textContent = z.ev;
+        const spots = [[0, 0]];
+        for (const r of [14, 24, 36]) for (let a = 0; a < 8; a++) spots.push([Math.round(r * 1.3 * Math.cos(a * Math.PI / 4)), Math.round(r * Math.sin(a * Math.PI / 4))]);
+        // a free spot inside the zone, else any free spot nearby (tiny zones), else the label point
+        const fits = (dx, dy, within) => {
+          t.setAttribute("x", z.x + dx); t.setAttribute("y", z.y + dy);
+          return (!within || (dx === 0 && dy === 0) || inside(path, z.x + dx, z.y + dy)) && free(box(t));
+        };
+        if (!spots.some(([dx, dy]) => fits(dx, dy, true)) && !spots.some(([dx, dy]) => fits(dx, dy, false))) fits(0, 0, false);
+        taken.push(box(t));
+      });
       const show = (e) => {
         const z = e.target.zone;
         if (!z) return;
@@ -839,13 +880,12 @@ const DATA = /*__PALETTE_DATA__*/null;
       $("#ec-score").innerHTML = `<span class="d">D ${ev.D}</span>&nbsp;·&nbsp;<span class="r">R ${ev.R}</span>`;
       $("#ec-bar-d").style.width = (100 * ev.D / total) + "%";
       $("#ec-bar-r").style.width = (100 * ev.R / total) + "%";
-      built = true;
     }
     // own URL: #538 (or a path ending in /538, where a server routes that to this page)
     const atLink = () => location.hash === "#538" || /\/538\/?$/.test(location.pathname);
     function toggleEC(show, scroll = true) {
-      if (show && !built) buildEC();
       ecBox.hidden = !show;
+      if (show && !built) { built = true; document.fonts.ready.then(buildEC); }  // label sizes need the web font
       if (show !== atLink()) {
         const path = location.pathname.replace(/\/538\/?$/, "/");
         try { history.replaceState(null, "", path + location.search + (show ? "#538" : "")); } catch { /* e.g. sandboxed */ }

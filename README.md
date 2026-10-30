@@ -72,7 +72,7 @@ On the palette page, type `538`, click the shield in the header, or open the pag
 
 - **Population:** Census 2020 block-group centres of population, each counted in the zone it falls in.
 - **Votes:** 2024 county results ([tonmcg/US_County_Level_Election_Results_08-24](https://github.com/tonmcg/US_County_Level_Election_Results_08-24)), shared out within each county by block-group population. Connecticut (planning regions) and DC (wards) are shared out state-wide.
-- **Names:** each zone is named after its largest city, the Natural Earth populated place with the biggest `POP_MAX` inside it (or the nearest one, for two tiny zones with none).
+- **Names:** each zone is named after its largest city, the Natural Earth populated place with the biggest `POP_MAX` inside it (or the nearest one, for two tiny zones with none). The map marks each city with a dot and its name.
 - **Electoral votes:** 2 per zone plus 430 House seats by Huntington–Hill (at least 1 each), for 538 in all. Winner takes all.
 
 It reads the committed polygons in `results/` and writes `results/electoral_x5_odd__x10.csv`. `export_web.py` picks that CSV up if it exists. The result is R 315 – D 223, against the real 312–226.
