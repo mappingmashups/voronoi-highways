@@ -68,7 +68,7 @@ For bivariate maps, the north–south and east–west region layers are intersec
 
 ### Easter egg: the Interstate Electoral College
 
-On the palette page, type `538` (or click the shield in the header) to treat the 54 zones of the major-routes map as states and replay the 2024 presidential election. `python scripts/electoral.py` makes the numbers behind it:
+On the palette page, type `538`, click the shield in the header, or open the page with `#538` at the end of its URL to treat the 54 zones of the major-routes map as states and replay the 2024 presidential election. `python scripts/electoral.py` makes the numbers behind it:
 
 - **Population:** Census 2020 block-group centres of population, each counted in the zone it falls in.
 - **Votes:** 2024 county results ([tonmcg/US_County_Level_Election_Results_08-24](https://github.com/tonmcg/US_County_Level_Election_Results_08-24)), shared out within each county by block-group population. Connecticut (planning regions) and DC (wards) are shared out state-wide.

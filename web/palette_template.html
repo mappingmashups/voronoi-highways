@@ -841,11 +841,19 @@ const DATA = /*__PALETTE_DATA__*/null;
       $("#ec-bar-r").style.width = (100 * ev.R / total) + "%";
       built = true;
     }
-    function toggleEC(show) {
+    // own URL: #538 (or a path ending in /538, where a server routes that to this page)
+    const atLink = () => location.hash === "#538" || /\/538\/?$/.test(location.pathname);
+    function toggleEC(show, scroll = true) {
       if (show && !built) buildEC();
       ecBox.hidden = !show;
-      if (show) ecBox.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      if (show !== atLink()) {
+        const path = location.pathname.replace(/\/538\/?$/, "/");
+        try { history.replaceState(null, "", path + location.search + (show ? "#538" : "")); } catch { /* e.g. sandboxed */ }
+      }
+      if (show && scroll) ecBox.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     }
+    window.addEventListener("hashchange", () => { if (atLink() === ecBox.hidden) toggleEC(atLink()); });
+    if (atLink()) toggleEC(true, false);
     let typed = "";
     document.addEventListener("keydown", (e) => {
       if (e.target.closest && e.target.closest("input, textarea, select")) return;
