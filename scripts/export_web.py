@@ -42,6 +42,15 @@ img { max-width: 100%; }
 """
 
 
+PLACEHOLDER = "/*__PALETTE_DATA__*/null"
+
+
+def embed(template, data):
+    """Inline the palette data into the page template."""
+    js = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+    return template.replace(PLACEHOLDER, js.replace("</", "<\\/"))
+
+
 def standalone(page):
     """Wrap the built page in a full HTML document: title, fonts and styles go in <head>."""
     split = page.index("</style>") + len("</style>")
@@ -94,10 +103,21 @@ def pair_data(ns, ew, label, desc, outline, roads):
                     x=round(cx, 1), y=round(cy, 1)),
         width=m.width, height=m.map_height,
         outline=m.area_d(outline.geometry.iloc[0]),
-        routes_ns=m.line_d(bv.routes_for(ns, roads).geometry),
-        routes_ew=m.line_d(bv.routes_for(ew, roads).geometry),
+        routes_ns=route_paths(m, bv.routes_for(ns, roads)),
+        routes_ew=route_paths(m, bv.routes_for(ew, roads)),
         cells=cells, **extra,
     ), combo
+
+
+def route_paths(m, routes):
+    """{route number: SVG path}, so the page can pick out single routes."""
+    return {str(int(n)): m.line_d(g.geometry) for n, g in routes.groupby("number")}
+
+
+def zone_fields(r):
+    """One row of the Electoral College CSV, as the page's data has it."""
+    return dict(ns=int(r.ns), ew=int(r.ew), city=r.city, pop=int(r.population), ev=int(r.ev),
+                r=int(r.votes_gop), d=int(r.votes_dem), t=int(r.total_votes))
 
 
 def electoral_data(m, combo):
@@ -109,9 +129,7 @@ def electoral_data(m, combo):
         biggest = max(getattr(geom, "geoms", [geom]), key=lambda g: g.area)
         pt = polylabel(biggest, tolerance=1000)
         x, y = m.xy(pt.x, pt.y)
-        zone = dict(ns=int(r.ns), ew=int(r.ew), city=r.city, pop=int(r.population), ev=int(r.ev),
-                    r=int(r.votes_gop), d=int(r.votes_dem), t=int(r.total_votes),
-                    x=round(x, 1), y=round(y, 1))
+        zone = dict(zone_fields(r), x=round(x, 1), y=round(y, 1))
         if r.city_lon != "":  # the city's dot (none for zones named after a place outside them)
             c = gpd.GeoSeries([Point(float(r.city_lon), float(r.city_lat))], crs=4326).to_crs(CRS).iloc[0]
             zone["cx"], zone["cy"] = (round(v, 1) for v in m.xy(c.x, c.y))
@@ -137,7 +155,7 @@ def main():
     if check:
         (WEB / "palette_check.json").write_text(json.dumps(check))
     template = (WEB / "palette_template.html").read_text()
-    page = template.replace("/*__PALETTE_DATA__*/null", js.replace("</", "<\\/"))
+    page = embed(template, data)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(page)
     PAGES.write_text(standalone(page))

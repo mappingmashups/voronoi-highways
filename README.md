@@ -63,6 +63,7 @@ For bivariate maps, the north–south and east–west region layers are intersec
 - pick, edit and save palettes;
 - fade automatically through all of them, or blend any two by hand;
 - view the major-route and all-Interstate maps on their own or side by side.
+- hover or tap a region to read its two route numbers and trace both routes along their full length.
 
 "Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
 
@@ -72,6 +73,8 @@ The page is published with GitHub Pages at **https://mappingmashups.github.io/vo
 python scripts/export_web.py --check
 python scripts/check_web.py docs/index.html
 ```
+
+`python scripts/check_pages.py` reports whether `docs/index.html` is behind its sources: the page template, the palette presets, or the Electoral College CSV. It runs on GitHub Actions for every pull request and push to `main` (`.github/workflows/pages-check.yml`). It doesn't need the data pipeline, so it can't tell whether the map geometry is current; rebuild after rerunning the pipeline too.
 
 `docs/.nojekyll` tells Pages to serve the files as they are, without running Jekyll.
 
