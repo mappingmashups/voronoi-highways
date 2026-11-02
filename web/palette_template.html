@@ -92,10 +92,12 @@ button, select, input[type="text"] {
 }
 button { cursor: pointer; font-weight: 600; }
 button:hover { border-color: var(--muted); }
+button:disabled { opacity: 0.5; cursor: default; }
+button:disabled:hover { border-color: var(--line); }
 button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 input[type="range"] { accent-color: var(--accent); flex: 1 1 140px; min-width: 0; }
-.val { font-family: var(--font-mono); font-size: 0.82rem; min-width: 5.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+.val { font-family: var(--font-mono); font-size: 0.82rem; min-width: 5.5ch; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
 
 .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .preset { display: grid; gap: 4px; padding: 6px; text-align: left; font-weight: 600; font-size: 0.76rem; line-height: 1.2; position: relative; }
@@ -194,6 +196,36 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
       <section class="panel" aria-labelledby="h-presets">
         <h2 id="h-presets">Palettes</h2>
         <div class="presets" id="presets"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-orient">
+        <h2 id="h-orient">Orientation</h2>
+        <div class="row">
+          <button type="button" id="rot-ccw" aria-label="Turn the palette 90° anticlockwise">↺ 90°</button>
+          <button type="button" id="rot-cw" aria-label="Turn the palette 90° clockwise">↻ 90°</button>
+          <button type="button" id="flip-ew">Mirror east–west</button>
+          <button type="button" id="flip-ns">Mirror north–south</button>
+          <button type="button" id="orient-reset">Reset</button>
+        </div>
+        <p class="note" id="orient-note">Turns and mirrors apply on top of whichever palette is showing. Save or Copy keeps them.</p>
+        <div id="ring-controls" hidden>
+          <div class="row">
+            <label for="ring">Turn the colour ring</label>
+            <input type="range" id="ring" min="-180" max="180" step="1" value="0" list="ring-ticks">
+            <span class="val" id="ring-val">0°</span>
+          </div>
+          <datalist id="ring-ticks">
+            <option value="-180"></option><option value="-135"></option><option value="-90"></option><option value="-45"></option>
+            <option value="0"></option><option value="45"></option><option value="90"></option><option value="135"></option><option value="180"></option>
+          </datalist>
+          <div class="row">
+            <button type="button" id="spin-btn">Spin</button>
+            <label for="spin-secs">Speed</label>
+            <input type="range" id="spin-secs" min="3" max="40" step="1" value="12" style="flex-basis: 80px">
+            <span class="val" id="spin-val">12 s/turn</span>
+          </div>
+          <p class="note" id="ring-note"></p>
+        </div>
       </section>
 
       <section class="panel" aria-labelledby="h-tour">
@@ -329,8 +361,8 @@ const DATA = /*__PALETTE_DATA__*/null;
     return [0.5, 0.5];
   }
 
-  // spec -> (u, v) -> "#rrggbb"
-  function makeFn(spec, pair) {
+  // spec -> (u, v) -> "#rrggbb", for an unturned palette
+  function baseFn(spec, pair) {
     if (spec.kind === "grid") {
       const lab = spec.rows.map((r) => r.map(hexToLab));
       const nr = lab.length, nc = lab[0].length;
@@ -358,6 +390,61 @@ const DATA = /*__PALETTE_DATA__*/null;
     throw new Error("Unknown palette kind: " + spec.kind);
   }
 
+  // ---------- orientation: quarter turns, mirrors and (for hue-wheel palettes) ring turns ----------
+  // A turn is described as: mirror east–west (if set), then `rot` quarter turns clockwise,
+  // then turn the colour ring clockwise by `ring` degrees. Grid palettes rearrange their control
+  // colours (so a centred palette keeps its centre); formula palettes transform the map coordinates.
+  const IDENTITY = { rot: 0, mirror: false, ring: 0 };
+  const ringable = (spec) => !!(spec && spec.ring && (spec.kind === "plane" || (spec.kind === "grid" && spec.rows.length === 3 && spec.rows[0].length === 3)));
+  const isIdentity = (o) => !o.rot && !o.mirror && !o.ring;
+
+  function turnGridCW(rows) {  // rows[j][i]: j south -> north, i west -> east
+    const nr = rows.length, nc = rows[0].length;
+    return Array.from({ length: nc }, (_, jp) => Array.from({ length: nr }, (_, ip) => rows[ip][nc - 1 - jp]));
+  }
+  const RING = [[0, 2], [1, 2], [2, 2], [2, 1], [2, 0], [1, 0], [0, 0], [0, 1]];  // (i, j) clockwise from the north-west corner
+  function turnRing(rows, deg) {
+    const s = (((deg / 45) % 8) + 8) % 8, n = Math.floor(s), f = s - n;
+    const old = RING.map(([i, j]) => hexToLab(rows[j][i]));
+    const out = rows.map((r) => r.slice());
+    RING.forEach(([i, j], k) => { out[j][i] = labToHex(lerp3(old[(k - n + 8) % 8], old[(k - n + 7) % 8], f)); });
+    return out;
+  }
+  function orientSpec(spec, o) {
+    const ring = ringable(spec) ? o.ring : 0;
+    if (!o.rot && !o.mirror && !ring) return spec;
+    if (spec.kind === "grid") {
+      let rows = spec.rows.map((r) => r.slice());
+      if (o.mirror) rows = rows.map((r) => r.reverse());
+      for (let k = 0; k < o.rot; k++) rows = turnGridCW(rows);
+      if (ring) rows = turnRing(rows, ring);
+      return { ...spec, rows };
+    }
+    return { ...spec, orient: { rot: o.rot, mirror: o.mirror, ring } };
+  }
+  function makeFn(spec, pair) {
+    const fn = baseFn(spec, pair), o = spec.orient;
+    if (!o) return fn;
+    const a = (o.ring * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+    return (u, v) => {  // undo the turn: find where this point's colour came from
+      let x = 2 * u - 1, y = 2 * v - 1;
+      [x, y] = [x * c - y * s, x * s + y * c];                 // ring turn back (anticlockwise)
+      for (let k = 0; k < o.rot; k++) [x, y] = [-y, x];       // quarter turns back (anticlockwise)
+      if (o.mirror) x = -x;
+      return fn((x + 1) / 2, (y + 1) / 2);
+    };
+  }
+  function describeOrient(spec, o) {
+    const parts = [];
+    if (o.mirror && o.rot === 2) parts.push("mirrored north–south");
+    else {
+      if (o.mirror) parts.push("mirrored east–west");
+      if (o.rot) parts.push(o.rot === 2 ? "turned 180°" : `turned 90° ${o.rot === 1 ? "clockwise" : "anticlockwise"}`);
+    }
+    if (ringable(spec) && o.ring) parts.push(`colour ring turned ${Math.abs(Math.round(o.ring))}° ${o.ring > 0 ? "clockwise" : "anticlockwise"}`);
+    return parts.length ? parts.join(", then ").replace(/^./, (ch) => ch.toUpperCase()) + "." : "";
+  }
+
   // ---------- state ----------
   const STORE_KEY = "voronoi-highways.saved";
   const OLD_STORE_KEY = "interstate-palette-lab.saved";  // name before the rename: still read, so saved palettes carry over
@@ -371,6 +458,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     saved: loadSaved(),
     routesMode: "auto",
     showCenter: true,
+    orient: { ...IDENTITY },        // applied on top of whatever palette is showing
     anim: null,
     tour: { playing: false, timer: null, index: 0 },
   };
@@ -471,15 +559,16 @@ const DATA = /*__PALETTE_DATA__*/null;
   // colours of a palette for one map, as OKLab arrays (cached per network)
   const cache = new Map();
   function coloursFor(pal, v) {
-    const key = v.pairIdx + "|" + pal.id + "|" + JSON.stringify(pal.spec);
+    const spec = orientSpec(pal.spec, state.orient);
+    const key = v.pairIdx + "|" + pal.id + "|" + JSON.stringify(spec);
     if (cache.has(key)) return cache.get(key);
-    const fn = makeFn(pal.spec, v.pair);
+    const fn = makeFn(spec, v.pair);
     const out = {
       cells: v.pair.cells.map((c) => hexToLab(fn(norm(c.ns), norm(c.ew)))),
       legend: v.legendEls.map((l) => hexToLab(fn(l.u, l.v))),
       routes: routeRgba(pal),
     };
-    cache.set(key, out);
+    if (!(state.orient.ring % 45)) cache.set(key, out);  // in-between ring angles (spinning) aren't worth keeping
     return out;
   }
   const targetsFor = (pal) => views.map((v) => coloursFor(pal, v));
@@ -527,6 +616,8 @@ const DATA = /*__PALETTE_DATA__*/null;
       const at = views.map((v) => `${v.pair.prefix[0]}${v.pair.center.ns} × ${v.pair.prefix[1]}${v.pair.center.ew}` + (views.length > 1 ? ` (${v.pair.label.toLowerCase()})` : ""));
       sub += `. Centre falls at ${at.join(" and ")}.`;
     }
+    const turned = pal.spec ? describeOrient(pal.spec, state.orient) : "";
+    if (turned) sub += (sub.endsWith(".") ? " " : ". ") + turned;
     $("#now-title").textContent = sub;
   }
   function updateCenterMarker(pal) {
@@ -571,7 +662,7 @@ const DATA = /*__PALETTE_DATA__*/null;
 
   // ---------- presets ----------
   function thumb(canvas, pal) {
-    const fn = makeFn(pal.spec, pair()), ctx = canvas.getContext("2d");
+    const fn = makeFn(orientSpec(pal.spec, state.orient), pair()), ctx = canvas.getContext("2d");
     const W = 30, H = 20;
     canvas.width = W; canvas.height = H;
     const img = ctx.createImageData(W, H);
@@ -614,6 +705,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     setNow(pal);
     updateCenterMarker(pal);
     if (loadEditorToo && id !== "custom") loadEditor(pal);
+    updateOrientUI();
     animateTo(targetsFor(pal), animate ? fadeSeconds() : 0);
   }
 
@@ -622,6 +714,7 @@ const DATA = /*__PALETTE_DATA__*/null;
   const fadeSeconds = () => +$("#fade").value;
   function tourList() { return allPalettes(); }
   function startTour() {
+    stopSpin();
     state.tour.playing = true;
     $("#tour-btn").textContent = "Pause";
     const list = tourList();
@@ -637,7 +730,7 @@ const DATA = /*__PALETTE_DATA__*/null;
         $("#tour-progress").style.width = (t * 100).toFixed(1) + "%";
         if (t < 1) { state.tour.timer = requestAnimationFrame(tick); return; }
         i = (i + 1) % list.length;
-        state.active = nxt.id; markActive(); setNow(nxt); updateCenterMarker(nxt);
+        state.active = nxt.id; markActive(); setNow(nxt); updateCenterMarker(nxt); updateOrientUI();
         animateTo(targetsFor(nxt), fadeSeconds(), () => { loadEditor(nxt); next(); });
       };
       state.tour.timer = requestAnimationFrame(tick);
@@ -675,7 +768,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     paintAll(mixAll(targetsFor(a), targetsFor(b), t));
     const name = t <= 0 ? a.name : t >= 1 ? b.name : `${a.name} → ${b.name} (${Math.round(t * 100)}%)`;
     state.active = t <= 0 ? a.id : t >= 1 ? b.id : null;
-    markActive(); setNow(t >= 1 ? b : a, name); updateCenterMarker(t >= 0.5 ? b : a);
+    markActive(); setNow(t >= 1 ? b : a, name); updateCenterMarker(t >= 0.5 ? b : a); updateOrientUI();
   }
   ["#blend", "#blend-a", "#blend-b"].forEach((s) => $(s).addEventListener("input", applyBlend));
 
@@ -728,7 +821,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     state.custom = editorSpec();
     state.active = "custom";
     const pal = paletteById("custom");
-    markActive(); setNow(pal, "Custom palette"); updateCenterMarker(pal);
+    markActive(); setNow(pal, "Custom palette"); updateCenterMarker(pal); updateOrientUI();
     animateTo(targetsFor(pal), animate ? Math.min(fadeSeconds(), 0.6) : 0);
   }
   function resize() {
@@ -761,13 +854,30 @@ const DATA = /*__PALETTE_DATA__*/null;
 
   // ---------- save / copy ----------
   function toast(msg) { $("#toast").textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => ($("#toast").textContent = ""), 3500); }
+  // The palette as shown, as a grid: the editor's colours with the current turn baked in.
+  // Formula palettes (no exact grid) are sampled into the editor's grid size.
+  function bakedSpec() {
+    const base = editorSpec(), o = state.orient;
+    if (isIdentity(o)) return base;
+    const act = state.active ? paletteById(state.active) : null;
+    let spec;
+    if (!act || act.id === "custom" || act.spec.kind === "grid") {
+      spec = orientSpec(act && act.spec.kind === "grid" && act.id !== "custom" ? { ...base, ring: act.spec.ring } : base, o);
+    } else {
+      const fn = makeFn(orientSpec(act.spec, o), pair());
+      spec = { kind: "grid", rows: sampleToGrid(fn, base.rows.length, base.rows[0].length, [0.5, 0.5]), center: "even" };
+    }
+    const { ring, ...plain } = spec;  // a saved grid is an ordinary palette: no ring turning
+    return plain;
+  }
   $("#save-btn").addEventListener("click", () => {
     const name = $("#save-name").value.trim() || `My palette ${state.saved.length + 1}`;
     const id = "saved-" + Date.now().toString(36);
-    state.saved.push({ id, name, title: "Saved palette", spec: editorSpec(), routes: "dark", saved: true });
+    state.saved.push({ id, name, title: "Saved palette", spec: bakedSpec(), routes: "dark", saved: true });
     storeSaved(state.saved);
     $("#save-name").value = "";
-    state.active = id; buildPresets(); markActive(); setNow(paletteById(id));
+    stopSpin(); state.orient = { ...IDENTITY }; syncOrientInputs();  // the turn is now part of the saved palette
+    state.active = id; buildPresets(); markActive(); setNow(paletteById(id)); loadEditor(paletteById(id)); updateOrientUI();
     toast(`Saved “${name}” in this browser.`);
   });
   function deleteSaved(id) {
@@ -783,7 +893,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     catch { fb.hidden = false; fb.value = text; fb.focus(); fb.select(); toast(`Couldn’t reach the clipboard. The ${what} is selected below; copy it from there.`); }
   }
   $("#copy-py").addEventListener("click", () => {
-    const spec = editorSpec(), p = pair();
+    const spec = bakedSpec(), p = pair();
     const c = centerOf(spec, p), nr = spec.rows.length, nc = spec.rows[0].length;
     const xs = stopsFor(nc, c[0]).map((x) => +x.toFixed(4)), ys = stopsFor(nr, c[1]).map((y) => +y.toFixed(4));
     const rows = spec.rows.map((r) => "[" + r.map((h) => `"${h}"`).join(", ") + "]").join(",\n              ");
@@ -810,6 +920,83 @@ const DATA = /*__PALETTE_DATA__*/null;
          views.length > 1 ? "SVG of both maps" : "map SVG");
   });
 
+  // ---------- orientation controls ----------
+  function shownSpecs() {  // the palettes currently on screen (two while blending)
+    if (state.active) return [paletteById(state.active).spec];
+    return [paletteById($("#blend-a").value).spec, paletteById($("#blend-b").value).spec];
+  }
+  function updateOrientUI() {
+    const specs = shownSpecs(), canRing = specs.some(ringable);
+    $("#ring-controls").hidden = !canRing;
+    $("#ring-note").textContent = specs.some((sp) => ringable(sp) && sp.kind === "grid")
+      ? "Each 45° moves every outer colour one place around the ring; in between, neighbours blend. The centre stays put."
+      : "Turns every hue around the middle of the grid, by any angle.";
+    if (!canRing) stopSpin();
+    $("#orient-reset").disabled = isIdentity(state.orient);
+  }
+  function syncOrientInputs() {
+    $("#ring").value = Math.round(state.orient.ring);
+    $("#ring-val").textContent = Math.round(state.orient.ring) + "°";
+  }
+  function repaintTurned(animate) {
+    if (!state.active) { applyBlend(); return; }
+    const pal = paletteById(state.active);
+    setNow(pal, state.active === "custom" ? "Custom palette" : undefined);
+    animateTo(targetsFor(pal), animate && !reduceMotion ? 0.35 : 0);
+  }
+  function turn(change) {
+    stopTour();
+    const o = state.orient;
+    if (change === "cw") o.rot = (o.rot + 1) % 4;
+    if (change === "ccw") o.rot = (o.rot + 3) % 4;
+    if (change === "ew") { o.rot = (4 - o.rot) % 4; o.mirror = !o.mirror; }        // mirror after the turn
+    if (change === "ns") { o.rot = (6 - o.rot) % 4; o.mirror = !o.mirror; }        // = mirror east–west, then 180°
+    if (change === "reset") { stopSpin(); state.orient = { ...IDENTITY }; syncOrientInputs(); }
+    updateOrientUI(); buildPresets(); markActive(); repaintTurned(true);
+  }
+  $("#rot-cw").addEventListener("click", () => turn("cw"));
+  $("#rot-ccw").addEventListener("click", () => turn("ccw"));
+  $("#flip-ew").addEventListener("click", () => turn("ew"));
+  $("#flip-ns").addEventListener("click", () => turn("ns"));
+  $("#orient-reset").addEventListener("click", () => turn("reset"));
+
+  function setRing(deg) {
+    state.orient.ring = deg;
+    syncOrientInputs(); updateOrientUI(); repaintTurned(false);
+  }
+  $("#ring").addEventListener("input", () => {
+    stopSpin(); stopTour();
+    let deg = +$("#ring").value;
+    const near = Math.round(deg / 45) * 45;
+    if (Math.abs(deg - near) <= 4) deg = near;  // snap to the 45° notches
+    setRing(deg);
+  });
+  $("#ring").addEventListener("change", () => { buildPresets(); markActive(); });
+
+  const spin = { on: false, raf: 0, last: 0 };
+  const spinSeconds = () => +$("#spin-secs").value;
+  $("#spin-secs").addEventListener("input", () => ($("#spin-val").textContent = spinSeconds() + " s/turn"));
+  function startSpin() {
+    stopTour();
+    spin.on = true; spin.last = performance.now();
+    $("#spin-btn").textContent = "Stop";
+    const step = (now) => {
+      if (!spin.on) return;
+      const deg = state.orient.ring + ((now - spin.last) / 1000) * (360 / spinSeconds());
+      spin.last = now;
+      setRing(((((deg + 180) % 360) + 360) % 360) - 180);
+      spin.raf = requestAnimationFrame(step);
+    };
+    spin.raf = requestAnimationFrame(step);
+  }
+  function stopSpin() {
+    if (!spin.on) return;
+    spin.on = false; cancelAnimationFrame(spin.raf);
+    $("#spin-btn").textContent = "Spin";
+    buildPresets(); markActive();
+  }
+  $("#spin-btn").addEventListener("click", () => (spin.on ? stopSpin() : startSpin()));
+
   // ---------- which maps ----------
   function setMode(mode) {
     stopTour();
@@ -824,7 +1011,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     $("#readout").innerHTML = '<span class="hint">Hover or tap a map to read a region’s two route numbers.</span>';
     if (!state.active) { applyBlend(); return; }  // mid-blend: keep the same mix
     const pal = paletteById(state.active) || DATA.presets[0];
-    setNow(pal); updateCenterMarker(pal);
+    setNow(pal); updateCenterMarker(pal); updateOrientUI();
     paintAll(targetsFor(pal));
   }
   for (const m of Object.keys(MODES)) $("#mode-" + m).addEventListener("click", () => setMode(m));
@@ -936,6 +1123,6 @@ const DATA = /*__PALETTE_DATA__*/null;
   state.custom = DATA.presets[0].spec;
   setMode("major");
   loadEditor(DATA.presets[0]);
-  window.__ipl = { makeFn, norm, DATA };  // used by the build-time colour check
+  window.__ipl = { makeFn, norm, DATA, orientSpec, ringable };  // used by the build-time colour check
 })();
 </script>
