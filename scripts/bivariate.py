@@ -105,6 +105,8 @@ LIGHT_ROUTES = dict(stroke="#ffffff", opacity=0.55)  # for schemes with a dark m
 # Geographic centre of the contiguous US (near Lebanon, Kansas)
 US_CENTER = (39.8283, -98.5795)
 
+# ring=True marks schemes whose outer colours run around a hue wheel (the compasses and the
+# full-spectrum plane): the palette page lets you turn those by any angle, not only 90°.
 SCHEMES = {
     "yellow_blue": dict(fn=corners(sw="#ffffff", nw="#2f6fd6", se="#f2cc0c", ne="#2f9a4a"),
                         title="White→blue (south→north) × white→yellow (west→east), green where both are high"),
@@ -122,19 +124,19 @@ SCHEMES = {
                                    ["#9fb79b", "#f3efe4", "#93c26a"],
                                    ["#2f62b8", "#6e8ea6", "#25744a"]]),
                           title="3×3 landscape: desert, wheat, sun / sage, cream, meadow / rain, slate, forest"),
-    "compass_3x3": dict(fn=grid(COMPASS),
+    "compass_3x3": dict(fn=grid(COMPASS), ring=True,
                         title="3×3 compass: white centre of the grid, a different hue in every direction"),
     # same colours, but the white centre sits at the route numbers found at the
     # geographic centre of the lower 48 (fn is built per map pair, see centred_fn)
-    "compass_centered": dict(rows=COMPASS, centered=True,
+    "compass_centered": dict(rows=COMPASS, centered=True, ring=True,
                              title="3×3 compass, white at the geographic centre of the lower 48"),
-    "compass_gray": dict(fn=grid(compass(GRAY)),
+    "compass_gray": dict(fn=grid(compass(GRAY)), ring=True,
                          title="3×3 compass, grey centre of the grid"),
-    "compass_black": dict(fn=grid(compass(BLACK)), routes=LIGHT_ROUTES,
+    "compass_black": dict(fn=grid(compass(BLACK)), routes=LIGHT_ROUTES, ring=True,
                           title="3×3 compass, black centre of the grid"),
-    "compass_centered_gray": dict(rows=compass(GRAY), centered=True,
+    "compass_centered_gray": dict(rows=compass(GRAY), centered=True, ring=True,
                                   title="3×3 compass, grey at the geographic centre of the lower 48"),
-    "compass_centered_black": dict(rows=compass(BLACK), centered=True, routes=LIGHT_ROUTES,
+    "compass_centered_black": dict(rows=compass(BLACK), centered=True, routes=LIGHT_ROUTES, ring=True,
                                    title="3×3 compass, black at the geographic centre of the lower 48"),
     "stevens_pink_teal_3x3": dict(fn=grid([["#e8e8e8", "#ace4e4", "#5ac8c8"],
                                            ["#dfb0d6", "#a5add3", "#5698b9"],
@@ -144,7 +146,7 @@ SCHEMES = {
                                             ["#b5c0da", "#90b2b3", "#5a9178"],
                                             ["#6c83b5", "#567994", "#2a5a5b"]]),
                                    title="3×3 classic bivariate (Stevens): blue north × green east"),
-    "spectrum": dict(fn=oklab_plane(),
+    "spectrum": dict(fn=oklab_plane(), ring=True,
                      title="Full-spectrum plane: west green / east red × south blue / north yellow"),
     "hue_lightness": dict(fn=hue_lightness(),
                           title="Rainbow hue from north–south route, darkness from east–west route"),

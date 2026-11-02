@@ -80,6 +80,8 @@ def preset_specs():
             if spec["kind"] == "grid":
                 spec["center"] = "even"
                 spec.pop("xs"), spec.pop("ys")  # all non-centred grids are evenly spaced
+        if s.get("ring"):  # outer colours form a hue wheel: the page can turn them by any angle
+            spec["ring"] = True
         light = s.get("routes", {}).get("stroke", "").lower() == "#ffffff"
         out.append(dict(id=key, name=NAMES.get(key, key), title=s["title"], spec=spec,
                         routes="light" if light else "dark"))
