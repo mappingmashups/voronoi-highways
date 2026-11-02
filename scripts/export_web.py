@@ -1,6 +1,6 @@
 """Export map geometry and palette presets for the interactive palette page (web/).
 
-Writes web/palette_data.json, then builds output/web/interstate_palettes.html from
+Writes web/palette_data.json, then builds output/web/voronoi_highways.html from
 web/palette_template.html by inlining that JSON. Also writes a standalone copy to
 docs/index.html (with its own <head>), which GitHub Pages serves from the docs/ folder. Optionally (--check) also writes the
 Python-computed colour of every cell for every preset, to test the page's JS port against.
@@ -21,7 +21,7 @@ from svgmap import CRS, SvgMap
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "processed"
 WEB = ROOT / "web"
-OUT = ROOT / "output" / "web" / "interstate_palettes.html"
+OUT = ROOT / "output" / "web" / "voronoi_highways.html"
 PAGES = ROOT / "docs" / "index.html"
 ELECTORAL = ROOT / "results" / "electoral_x5_odd__x10.csv"  # from electoral.py (the Easter egg)
 

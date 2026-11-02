@@ -2,7 +2,7 @@
 
 Run after `python scripts/export_web.py --check`: opens the built page in Chromium and
 compares every cell's colour for every preset on both route pairs (tolerance: 1/255).
-Usage: python scripts/check_web.py [page.html or URL]   (default: output/web/interstate_palettes.html)
+Usage: python scripts/check_web.py [page.html or URL]   (default: output/web/voronoi_highways.html)
 """
 import json
 import sys
@@ -13,7 +13,7 @@ from playwright.sync_api import sync_playwright
 from svgmap import launch_browser
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGE = ROOT / "output" / "web" / "interstate_palettes.html"
+PAGE = ROOT / "output" / "web" / "voronoi_highways.html"
 CHECK = ROOT / "web" / "palette_check.json"
 
 COMPARE = """(check) => {

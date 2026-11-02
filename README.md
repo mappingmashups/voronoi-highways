@@ -31,7 +31,7 @@ Run the scripts from the repository root, in this order. All outputs go to `data
 | 3. Highway map | `python scripts/render_svg.py` | `output/lower48_highways.svg` |
 | 4. Nearest-route maps | `python scripts/voronoi.py [selection …]` | `output/voronoi_<selection>.svg` and regions in `data/processed/` |
 | 5. Bivariate maps | `python scripts/bivariate.py [ns ew [scheme …]]` | `output/bivariate/<ns>__<ew>__<scheme>.svg` |
-| 6. Palette page | `python scripts/export_web.py --check` then `python scripts/check_web.py` | `output/web/interstate_palettes.html`, an interactive palette explorer |
+| 6. Palette page | `python scripts/export_web.py --check` then `python scripts/check_web.py` | `output/web/voronoi_highways.html`, an interactive palette explorer |
 
 Step 5 needs both of its selections from step 4. The defaults are `x5_odd x10`; the all-Interstates pair is `odd even`.
 
