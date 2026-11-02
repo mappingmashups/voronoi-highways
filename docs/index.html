@@ -10,7 +10,7 @@ body { margin: 0; font: 14px system-ui, sans-serif; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
-<title>Interstate Palette Lab</title>
+<title>Voronoi Highways</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,7 +163,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
       <text x="22" y="34" text-anchor="middle" font-family="Overpass, Arial, sans-serif" font-weight="800" font-size="17" fill="#fff">×</text>
     </svg>
     <div>
-      <h1>Interstate Palette Lab</h1>
+      <h1>Voronoi Highways</h1>
       <p class="lede">Every point in the lower 48 is coloured by its nearest north–south (odd) and nearest east–west (even) Interstate. Pick a palette, build your own, or let the map drift through all of them.</p>
     </div>
   </header>
@@ -374,8 +374,9 @@ const DATA = {"scale":[0,100],"presets":[{"id":"yellow_blue","name":"Blue × yel
   }
 
   // ---------- state ----------
-  const STORE_KEY = "interstate-palette-lab.saved";
-  const loadSaved = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch { return []; } };
+  const STORE_KEY = "voronoi-highways.saved";
+  const OLD_STORE_KEY = "interstate-palette-lab.saved";  // name before the rename: still read, so saved palettes carry over
+  const loadSaved = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY) || localStorage.getItem(OLD_STORE_KEY) || "[]"); } catch { return []; } };
   const storeSaved = (list) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch { /* storage unavailable */ } };
 
   const state = {
