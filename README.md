@@ -65,7 +65,7 @@ For bivariate maps, the north–south and east–west region layers are intersec
 `export_web.py` exports the bivariate cells, routes and every scheme in `SCHEMES` as JSON. It inlines them into `web/palette_template.html` to make a single self-contained page. On the page you can:
 
 - pick, edit and save palettes;
-- fade automatically through all of them, or blend any two by hand;
+- fade automatically through all of them (this starts on its own when the page opens, unless the browser asks for reduced motion, and pauses as soon as you pick or change a palette), or blend any two by hand;
 - view the major-route and all-Interstate maps on their own or side by side;
 - turn any palette in 90° steps or mirror it; the compass palettes and Full spectrum can also turn their colour ring by any angle, or spin;
 - hover or tap a region to read its two route numbers and trace both routes along their full length.

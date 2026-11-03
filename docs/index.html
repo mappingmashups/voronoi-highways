@@ -1138,6 +1138,9 @@ const DATA = {"scale":[0,100],"presets":[{"id":"yellow_blue","name":"Blue × yel
   state.custom = DATA.presets[0].spec;
   setMode("major");
   loadEditor(DATA.presets[0]);
+  // play through all palettes from the start, unless the visitor prefers reduced motion;
+  // picking, editing, blending or turning a palette pauses it
+  if (!reduceMotion) startTour();
   window.__ipl = { makeFn, norm, DATA, orientSpec, ringable };  // used by the build-time colour check
 })();
 </script>
