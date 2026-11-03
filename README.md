@@ -4,6 +4,10 @@ Voronoi polygon experiments creating colorful maps of the USA based on distance 
 
 Every point in the lower 48 is assigned to its nearest highway from a chosen set: for example, the north–south Interstates numbered 5, 15, 25 … 95. The result is colored by route number. Interstate numbers follow a grid: odd numbers run north–south and increase west to east, and even numbers run east–west and increase south to north. Overlaying a north–south map with an east–west map makes a **bivariate** map, where each place's color comes from its pair of nearest routes.
 
+![Animation: the odd Interstates divisible by 5 draw in with their nearest-route zones, then the Interstates divisible by 10 with theirs, then both together in one bivariate map](docs/images/intro.gif)
+
+*How the maps are built. First the odd Interstates divisible by 5 and the area nearest each one, then the Interstates divisible by 10, then both together: every place colored by its pair of nearest routes. [Full-size video (MP4)](https://mappingmashups.github.io/voronoi-highways/images/intro.mp4).*
+
 | Nearest of I-5, 15, 25 … 95 | All odd × all even Interstates, compass palette |
 |---|---|
 | ![Nearest Interstate, odd and divisible by 5](docs/images/nearest_interstate_x5.png) | ![Bivariate map of all Interstates](docs/images/bivariate_compass_centered.png) |
@@ -70,7 +74,7 @@ For bivariate maps, the north–south and east–west region layers are intersec
 - turn any palette in 90° steps or mirror it; the compass palettes and Full spectrum can also turn their color ring by any angle, or spin;
 - hover or tap a region to read its two route numbers and trace both routes along their full length.
 
-"Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `python scripts/spin_gif.py [palette]` records a ring palette turning one full revolution as a GIF (the one above is the default, `compass_centered_gray`); it uses ffmpeg when it's installed, for a file about half the size. `check_web.py` confirms that the page's JavaScript colors match the Python ones to within 1/255.
+"Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `python scripts/spin_gif.py [palette]` records a ring palette turning one full revolution as a GIF (the one above is the default, `compass_centered_gray`); it uses ffmpeg when it's installed, for a file about half the size. `python scripts/intro_animation.py --readme` rebuilds the animation at the top of this README (`docs/images/intro.gif`, plus a 1600 px `intro.mp4`): it renders a timeline page frame by frame in headless Chromium and needs ffmpeg. `check_web.py` confirms that the page's JavaScript colors match the Python ones to within 1/255.
 
 The page is published with GitHub Pages at **https://mappingmashups.github.io/voronoi-highways/**, served from `docs/index.html` on `main`. `export_web.py` writes that file too, as a standalone copy with its own `<head>`. It's committed rather than built on GitHub, so after changing schemes, data or the template, rebuild it and commit `docs/index.html`:
 

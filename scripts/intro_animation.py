@@ -12,8 +12,11 @@
 The timeline lives in a generated HTML page (render(t) draws any moment), so every frame is exact;
 headless Chromium captures the frames and ffmpeg encodes them.
 
-Usage: python scripts/intro_animation.py [--fps 30] [--width 1600] [--out PATH] [--html-only]
+Usage: python scripts/intro_animation.py [--fps 30] [--width 1600] [--out PATH] [--gif PATH] [--html-only]
+       python scripts/intro_animation.py --readme   # docs/images/intro.mp4 and intro.gif
 Needs the processed data (see README) and ffmpeg. Writes output/intro/intro.html and intro.mp4.
+The GIF is captured separately, smaller (--gif-width, --gif-fps), straight from the page:
+making it from the MP4 would carry the video's compression noise into banding stripes.
 """
 import argparse
 import json
@@ -272,8 +275,14 @@ def main():
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--width", type=int, default=1600, help="video width in pixels")
     ap.add_argument("--out", type=Path, default=OUT / "intro.mp4")
+    ap.add_argument("--gif", type=Path, help="also write a GIF here")
+    ap.add_argument("--gif-width", type=int, default=720)
+    ap.add_argument("--gif-fps", type=int, default=20, help="GIF timing is in 10 ms steps: 20 fps keeps the length exact")
+    ap.add_argument("--readme", action="store_true", help="write docs/images/intro.mp4 and docs/images/intro.gif")
     ap.add_argument("--html-only", action="store_true", help="write the timeline page, skip rendering")
     args = ap.parse_args()
+    if args.readme:
+        args.out, args.gif = ROOT / "docs" / "images" / "intro.mp4", ROOT / "docs" / "images" / "intro.gif"
 
     data = build_data()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -283,25 +292,36 @@ def main():
     if args.html_only:
         return
 
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    capture(html, data, args.width, args.fps, ["-c:v", "libx264", "-crf", "18", "-preset", "slow",
+                                               "-pix_fmt", "yuv420p", "-movflags", "+faststart"], args.out)
+    if args.gif:
+        # one color table from all frames; only changed areas are stored from frame to frame
+        args.gif.parent.mkdir(parents=True, exist_ok=True)
+        capture(html, data, args.gif_width, args.gif_fps, [
+            "-vf", "split[a][b];[a]palettegen=stats_mode=full[p];[b][p]paletteuse=dither=none:diff_mode=rectangle",
+            "-loop", "0"], args.gif)
+
+
+def capture(html, data, width, fps, encode, out):
+    """Render every frame of the timeline page at this width and frame rate, then encode with ffmpeg."""
     m2 = 2 * data["margin"]
-    height = round(args.width * (data["height"] + m2) / (data["width"] + m2) / 2) * 2  # even, for H.264
+    height = round(width * (data["height"] + m2) / (data["width"] + m2) / 2) * 2  # even, for H.264
     with sync_playwright() as p, tempfile.TemporaryDirectory(dir=OUT) as tmp:
         browser = launch_browser(p)
-        page = browser.new_page(viewport={"width": args.width, "height": height})
+        page = browser.new_page(viewport={"width": width, "height": height})
         page.goto(html.as_uri())
         page.evaluate("document.fonts.ready")
         total = page.evaluate("TOTAL")
-        frames = int(total * args.fps) + 1
-        print(f"{total:.1f} s, {frames} frames at {args.fps} fps, {args.width}×{height}")
+        frames = int(total * fps) + 1
+        print(f"{out.name}: {total:.1f} s, {frames} frames at {fps} fps, {width}×{height}")
         for f in range(frames):
-            page.evaluate("t => render(t)", f / args.fps)
-            page.screenshot(path=f"{tmp}/{f:05d}.png", clip=dict(x=0, y=0, width=args.width, height=height))
+            page.evaluate("t => render(t)", f / fps)
+            page.screenshot(path=f"{tmp}/{f:05d}.png", clip=dict(x=0, y=0, width=width, height=height))
         browser.close()
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(args.fps), "-i", f"{tmp}/%05d.png",
-                        "-c:v", "libx264", "-crf", "18", "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                        str(args.out)], check=True)
-    print(f"wrote {args.out} ({args.out.stat().st_size / 1024 / 1024:.1f} MB)")
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps), "-i", f"{tmp}/%05d.png", *encode, str(out)],
+                       check=True)
+    print(f"wrote {out} ({out.stat().st_size / 1024 / 1024:.1f} MB)")
 
 
 if __name__ == "__main__":
