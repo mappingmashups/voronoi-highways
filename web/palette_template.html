@@ -126,7 +126,9 @@ input[type="range"] { accent-color: var(--accent); flex: 1 1 140px; min-width: 0
 .compass-labels .e { grid-area: e; }
 textarea { width: 100%; min-height: 90px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; }
 .toast { color: var(--accent); font-size: 0.84rem; min-height: 1.2em; margin: 0; }
-footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
+footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; display: grid; gap: 8px; }
+footer p { margin: 0; }
+footer a { color: var(--accent); }
 
 /* Easter egg: type 538 or click the shield */
 .ec .ec-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
@@ -303,7 +305,10 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
       </section>
     </aside>
   </div>
-  <footer>Regions are nearest-route Voronoi cells built from Natural Earth 1:10m roads (with label fixes), measured in Conus Albers. Route numbers map onto a fixed 0–100 scale on both axes, so colors stay comparable between the two networks. Saved palettes stay in this browser only.</footer>
+  <footer>
+    <p>Regions are nearest-route Voronoi cells built from Natural Earth 1:10m roads (with label fixes), measured in Conus Albers. Route numbers map onto a fixed 0–100 scale on both axes, so colors stay comparable between the two networks. Saved palettes stay in this browser only.</p>
+    <p>This map was created for the <a href="https://30daymapchallenge.com/">#30DayMapChallenge</a> Day 3: Polygons. Concept and direction by <a href="https://mappingmashups.net/">Alan McConchie</a>, code implemented by <a href="https://claude.ai">Claude</a>.</p>
+  </footer>
 </div>
 
 <script>
