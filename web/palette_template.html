@@ -6,7 +6,7 @@
 <style>
 /* Layout: map-first workbench. Map + legend on the left, a control rail on the right; one column on phones. */
 :root {
-  --bg: #eef2ef;          /* cool grey with a hint of guide-sign green */
+  --bg: #eef2ef;          /* cool gray with a hint of guide-sign green */
   --surface: #ffffff;
   --ink: #16201b;
   --muted: #56635c;
@@ -75,9 +75,10 @@ h1 { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.15rem); font-weight: 800; margin
 
 .legend-wrap { overflow-x: auto; }
 .legend { display: block; max-width: 100%; height: auto; }
-.legend text { fill: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+.legend text { fill: var(--muted); font-family: var(--font-ui); font-size: 10px; font-variant-numeric: tabular-nums; }
 .legend .sq.hl { stroke: var(--ink); stroke-width: 2; }
 .axis-note { color: var(--muted); font-size: 0.82rem; }
+.legend-notes { display: grid; gap: 2px; }  /* one line each, under the grid */
 
 aside { display: grid; gap: 14px; min-width: 0; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 12px; min-width: 0; }
@@ -156,7 +157,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
     </svg>
     <div>
       <h1>Voronoi Highways</h1>
-      <p class="lede">Every point in the lower 48 is coloured by its nearest north–south (odd) and nearest east–west (even) Interstate. Pick a palette, build your own, or let the map drift through all of them.</p>
+      <p class="lede">Every point in the lower 48 is colored by its nearest north–south (odd) and nearest east–west (even) Interstate. Pick a palette, build your own, or let the map drift through all of them.</p>
     </div>
   </header>
 
@@ -174,8 +175,8 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
     </div>
     <div class="bar" aria-hidden="true"><div id="ec-bar-d"></div><span class="mid"></span><div id="ec-bar-r"></div></div>
     <div class="readout" id="ec-readout" aria-live="polite"><span class="hint">Hover or tap a zone. 270 to win.</span></div>
-    <svg class="map" id="ec-map" role="img" aria-label="Map of the 54 Interstate zones coloured by 2024 winner"></svg>
-    <p class="note">Population: Census 2020 block groups. Votes: 2024 county results, shared out within each county by population. Each zone gets 2 electoral votes plus House seats by Huntington–Hill, for 538 in all (Alaska and Hawaii aren’t on the map). Winner takes all; deeper colour means a wider margin.</p>
+    <svg class="map" id="ec-map" role="img" aria-label="Map of the 54 Interstate zones colored by 2024 winner"></svg>
+    <p class="note">Population: Census 2020 block groups. Votes: 2024 county results, shared out within each county by population. Each zone gets 2 electoral votes plus House seats by Huntington–Hill, for 538 in all (Alaska and Hawaii aren’t on the map). Winner takes all; deeper color means a wider margin.</p>
   </section>
 
   <div class="work">
@@ -206,7 +207,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
       <section class="panel" aria-labelledby="h-orient">
         <h2 id="h-orient">Orientation</h2>
         <div class="row">
-          <button type="button" id="rot-ccw" aria-label="Turn the palette 90° anticlockwise">↺ 90°</button>
+          <button type="button" id="rot-ccw" aria-label="Turn the palette 90° counterclockwise">↺ 90°</button>
           <button type="button" id="rot-cw" aria-label="Turn the palette 90° clockwise">↻ 90°</button>
           <button type="button" id="flip-ew">Mirror east–west</button>
           <button type="button" id="flip-ns">Mirror north–south</button>
@@ -215,7 +216,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
         <p class="note" id="orient-note">Turns and mirrors apply on top of whichever palette is showing. Save or Copy keeps them.</p>
         <div id="ring-controls" hidden>
           <div class="row">
-            <label for="ring">Turn the colour ring</label>
+            <label for="ring">Turn the color ring</label>
             <input type="range" id="ring" min="-180" max="180" step="1" value="0" list="ring-ticks">
             <span class="val" id="ring-val">0°</span>
           </div>
@@ -254,7 +255,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
 
       <section class="panel" aria-labelledby="h-edit">
         <h2 id="h-edit">Your palette</h2>
-        <p class="note" id="edit-note">Change any colour to make a custom palette. Rows run north (top) to south; columns west to east.</p>
+        <p class="note" id="edit-note">Change any color to make a custom palette. Rows run north (top) to south; columns west to east.</p>
         <div class="row">
           <label for="cols">Columns</label>
           <select id="cols"><option>2</option><option>3</option><option>4</option><option>5</option></select>
@@ -272,7 +273,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
           <label for="center-mode">Middle of the grid</label>
           <select id="center-mode">
             <option value="even">Middle of the numbers (50)</option>
-            <option value="geo">Geographic centre</option>
+            <option value="geo">Geographic center</option>
             <option value="custom">Custom</option>
           </select>
         </div>
@@ -302,7 +303,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
       </section>
     </aside>
   </div>
-  <footer>Regions are nearest-route Voronoi cells built from Natural Earth 1:10m roads (with label fixes), measured in Conus Albers. Route numbers map onto a fixed 0–100 scale on both axes, so colours stay comparable between the two networks. Saved palettes stay in this browser only.</footer>
+  <footer>Regions are nearest-route Voronoi cells built from Natural Earth 1:10m roads (with label fixes), measured in Conus Albers. Route numbers map onto a fixed 0–100 scale on both axes, so colors stay comparable between the two networks. Saved palettes stay in this browser only.</footer>
 </div>
 
 <script>
@@ -316,7 +317,7 @@ const DATA = /*__PALETTE_DATA__*/null;
   const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // ---------- colour maths (mirrors scripts/colorspace.py and scripts/bivariate.py) ----------
+  // ---------- color math (mirrors scripts/colorspace.py and scripts/bivariate.py) ----------
   const hexToRgb = (h) => { h = h.replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
   const rgbToHex = (rgb) => "#" + rgb.map((c) => Math.round(clamp(c) * 255).toString(16).padStart(2, "0")).join("");
   const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
@@ -355,7 +356,7 @@ const DATA = /*__PALETTE_DATA__*/null;
   }
 
   const norm = (n) => clamp((n - DATA.scale[0]) / (DATA.scale[1] - DATA.scale[0]));
-  // stop positions for n control colours, bent so the middle lands at c (c = 0.5 gives even spacing)
+  // stop positions for n control colors, bent so the middle lands at c (c = 0.5 gives even spacing)
   const warp = (t, c) => (t <= 0.5 ? (t / 0.5) * c : c + ((t - 0.5) / 0.5) * (1 - c));
   const stopsFor = (n, c) => Array.from({ length: n }, (_, i) => warp(i / (n - 1), c));
 
@@ -396,8 +397,8 @@ const DATA = /*__PALETTE_DATA__*/null;
 
   // ---------- orientation: quarter turns, mirrors and (for hue-wheel palettes) ring turns ----------
   // A turn is described as: mirror east–west (if set), then `rot` quarter turns clockwise,
-  // then turn the colour ring clockwise by `ring` degrees. Grid palettes rearrange their control
-  // colours (so a centred palette keeps its centre); formula palettes transform the map coordinates.
+  // then turn the color ring clockwise by `ring` degrees. Grid palettes rearrange their control
+  // colors (so a centered palette keeps its center); formula palettes transform the map coordinates.
   const IDENTITY = { rot: 0, mirror: false, ring: 0 };
   const ringable = (spec) => !!(spec && spec.ring && (spec.kind === "plane" || (spec.kind === "grid" && spec.rows.length === 3 && spec.rows[0].length === 3)));
   const isIdentity = (o) => !o.rot && !o.mirror && !o.ring;
@@ -406,7 +407,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     const nr = rows.length, nc = rows[0].length;
     return Array.from({ length: nc }, (_, jp) => Array.from({ length: nr }, (_, ip) => rows[ip][nc - 1 - jp]));
   }
-  const RING = [[0, 2], [1, 2], [2, 2], [2, 1], [2, 0], [1, 0], [0, 0], [0, 1]];  // (i, j) clockwise from the north-west corner
+  const RING = [[0, 2], [1, 2], [2, 2], [2, 1], [2, 0], [1, 0], [0, 0], [0, 1]];  // (i, j) clockwise from the northwest corner
   function turnRing(rows, deg) {
     const s = (((deg / 45) % 8) + 8) % 8, n = Math.floor(s), f = s - n;
     const old = RING.map(([i, j]) => hexToLab(rows[j][i]));
@@ -430,10 +431,10 @@ const DATA = /*__PALETTE_DATA__*/null;
     const fn = baseFn(spec, pair), o = spec.orient;
     if (!o) return fn;
     const a = (o.ring * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
-    return (u, v) => {  // undo the turn: find where this point's colour came from
+    return (u, v) => {  // undo the turn: find where this point's color came from
       let x = 2 * u - 1, y = 2 * v - 1;
-      [x, y] = [x * c - y * s, x * s + y * c];                 // ring turn back (anticlockwise)
-      for (let k = 0; k < o.rot; k++) [x, y] = [-y, x];       // quarter turns back (anticlockwise)
+      [x, y] = [x * c - y * s, x * s + y * c];                 // ring turn back (counterclockwise)
+      for (let k = 0; k < o.rot; k++) [x, y] = [-y, x];       // quarter turns back (counterclockwise)
       if (o.mirror) x = -x;
       return fn((x + 1) / 2, (y + 1) / 2);
     };
@@ -443,9 +444,9 @@ const DATA = /*__PALETTE_DATA__*/null;
     if (o.mirror && o.rot === 2) parts.push("mirrored north–south");
     else {
       if (o.mirror) parts.push("mirrored east–west");
-      if (o.rot) parts.push(o.rot === 2 ? "turned 180°" : `turned 90° ${o.rot === 1 ? "clockwise" : "anticlockwise"}`);
+      if (o.rot) parts.push(o.rot === 2 ? "turned 180°" : `turned 90° ${o.rot === 1 ? "clockwise" : "counterclockwise"}`);
     }
-    if (ringable(spec) && o.ring) parts.push(`colour ring turned ${Math.abs(Math.round(o.ring))}° ${o.ring > 0 ? "clockwise" : "anticlockwise"}`);
+    if (ringable(spec) && o.ring) parts.push(`color ring turned ${Math.abs(Math.round(o.ring))}° ${o.ring > 0 ? "clockwise" : "counterclockwise"}`);
     return parts.length ? parts.join(", then ").replace(/^./, (ch) => ch.toUpperCase()) + "." : "";
   }
 
@@ -465,7 +466,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     anim: null,
     tour: { playing: false, timer: null, index: 0 },
   };
-  const pair = () => views[0].pair;   // the first map shown: drives thumbnails and the editor's centre labels
+  const pair = () => views[0].pair;   // the first map shown: drives thumbnails and the editor's center labels
   const allPalettes = () => [...DATA.presets, ...state.saved];
   const paletteById = (id) => (id === "custom" ? { id: "custom", name: "Custom", title: "Your palette", spec: state.custom, routes: "dark" } : allPalettes().find((p) => p.id === id));
 
@@ -489,14 +490,18 @@ const DATA = /*__PALETTE_DATA__*/null;
     const desc = document.createElement("span");
     desc.textContent = " · " + p.desc;
     label.append(p.label, desc);
-    const svg = el("svg", { class: "map", role: "img", "aria-label": `${p.label}: the lower 48 coloured by nearest Interstate pair` });
-    const note = document.createElement("div");
-    note.className = "axis-note";
+    const svg = el("svg", { class: "map", role: "img", "aria-label": `${p.label}: the lower 48 colored by nearest Interstate pair` });
+    // legend captions are page text (not SVG), so they keep the page font and size when the grid scales down
+    const caption = () => { const d = document.createElement("div"); d.className = "axis-note"; return d; };
+    const north = caption(), east = caption(), small = caption();
     const wrap = document.createElement("div");
     wrap.className = "legend-wrap";
-    const legend = el("svg", { class: "legend", "aria-label": "Colour legend: north–south route across, east–west route up" }, wrap);
-    card.append(label, svg, note, wrap);
-    const v = { pairIdx, pair: p, card, svg, legend, note, cellEls: [], legendEls: [], legendIndex: new Map(),
+    const legend = el("svg", { class: "legend", "aria-label": "Color legend: north–south route across, east–west route up" }, wrap);
+    const below = document.createElement("div");
+    below.className = "legend-notes";
+    below.append(east, small);
+    card.append(label, svg, north, wrap, below);
+    const v = { pairIdx, pair: p, card, svg, legend, notes: { north, east, small }, cellEls: [], legendEls: [], legendIndex: new Map(),
                 routeEls: [], routeByKey: null, routeHl: null, shown: null };
     buildMap(v); buildLegend(v);
     const onCell = (e) => { const i = e.target.dataset && e.target.dataset.i; if (i !== undefined) showReadout(v, +i); };
@@ -533,7 +538,7 @@ const DATA = /*__PALETTE_DATA__*/null;
 
   function buildLegend(v) {
     const p = v.pair, nx = p.ns.length, ny = p.ew.length, svg = v.legend;
-    const cell = nx > 12 ? 15 : 24, left = 40, top = 6, bottom = 34;
+    const cell = nx > 12 ? 15 : 24, left = 40, top = 6, bottom = 16;
     const w = left + nx * cell + 8, h = top + ny * cell + bottom;
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     svg.setAttribute("width", w);
@@ -552,13 +557,14 @@ const DATA = /*__PALETTE_DATA__*/null;
       if (nx > 12 && i % 2) return; // thin out labels on the big grid
       el("text", { x: left + i * cell + cell / 2 - 1, y: top + ny * cell + 12, "text-anchor": "middle" }, svg).textContent = n;
     });
-    el("text", { x: left, y: top + ny * cell + 28 }, svg).textContent = `→ east: north–south route (${p.prefix[0]}${p.ns[0]}…${p.ns[nx - 1]})`;
-    v.note.textContent = `↑ north: east–west route (${p.prefix[1]}${p.ew[0]}…${p.ew[ny - 1]}). Small squares are combinations that don’t occur on this map.`;
+    v.notes.north.textContent = `↑ north: east–west route (${p.prefix[1]}${p.ew[0]}…${p.ew[ny - 1]})`;
+    v.notes.east.textContent = `→ east: north–south route (${p.prefix[0]}${p.ns[0]}…${p.ns[nx - 1]})`;
+    v.notes.small.textContent = "Small squares are combinations that don’t occur on this map.";
   }
 
-  // colours of a palette for one map, as OKLab arrays (cached per network)
+  // colors of a palette for one map, as OKLab arrays (cached per network)
   const cache = new Map();
-  function coloursFor(pal, v) {
+  function colorsFor(pal, v) {
     const spec = orientSpec(pal.spec, state.orient);
     const key = v.pairIdx + "|" + pal.id + "|" + JSON.stringify(spec);
     if (cache.has(key)) return cache.get(key);
@@ -571,7 +577,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     if (!(state.orient.ring % 45)) cache.set(key, out);  // in-between ring angles (spinning) aren't worth keeping
     return out;
   }
-  const targetsFor = (pal) => views.map((v) => coloursFor(pal, v));
+  const targetsFor = (pal) => views.map((v) => colorsFor(pal, v));
   function routeRgba(pal) {
     const mode = state.routesMode === "auto" ? pal.routes : state.routesMode;
     if (mode === "off") return [0.2, 0.2, 0.2, 0];
@@ -614,7 +620,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     let sub = pal.title || "";
     if (pal.spec && pal.spec.kind === "grid" && pal.spec.center === "geo") {
       const at = views.map((v) => `${v.pair.prefix[0]}${v.pair.center.ns} × ${v.pair.prefix[1]}${v.pair.center.ew}` + (views.length > 1 ? ` (${v.pair.label.split(" ")[0].toLowerCase()})` : ""));
-      sub += `. Centre at ${at.join(", ")}.`;
+      sub += `. Center at ${at.join(", ")}.`;
     }
     const turned = pal.spec ? describeOrient(pal.spec, state.orient) : "";
     if (turned) sub += (sub.endsWith(".") ? " " : ". ") + turned;
@@ -784,11 +790,11 @@ const DATA = /*__PALETTE_DATA__*/null;
       if (spec.center === "geo" || spec.center === "even") editor.mode = spec.center;
       else if (spec.center && typeof spec.center === "object") { editor.mode = "custom"; editor.cu = spec.center.u; editor.cv = spec.center.v; }
       else editor.mode = "even";
-      $("#edit-note").textContent = "Change any colour to make a custom palette. Rows run north (top) to south; columns west to east.";
+      $("#edit-note").textContent = "Change any color to make a custom palette. Rows run north (top) to south; columns west to east.";
     } else {
       editor.mode = "even";
       editor.rows = sampleToGrid(makeFn(spec, pair()), 5, 5, [0.5, 0.5]);
-      $("#edit-note").textContent = `“${pal.name}” is a formula, shown here as a 5×5 sample. Editing a colour turns it into a 5×5 grid palette.`;
+      $("#edit-note").textContent = `“${pal.name}” is a formula, shown here as a 5×5 sample. Editing a color turns it into a 5×5 grid palette.`;
     }
     renderEditor();
   }
@@ -848,7 +854,7 @@ const DATA = /*__PALETTE_DATA__*/null;
 
   // ---------- save / copy ----------
   function toast(msg) { $("#toast").textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => ($("#toast").textContent = ""), 3500); }
-  // The palette as shown, as a grid: the editor's colours with the current turn baked in.
+  // The palette as shown, as a grid: the editor's colors with the current turn baked in.
   // Formula palettes (no exact grid) are sampled into the editor's grid size.
   function bakedSpec() {
     const base = editorSpec(), o = state.orient;
@@ -892,8 +898,8 @@ const DATA = /*__PALETTE_DATA__*/null;
     const xs = stopsFor(nc, c[0]).map((x) => +x.toFixed(4)), ys = stopsFor(nr, c[1]).map((y) => +y.toFixed(4));
     const rows = spec.rows.map((r) => "[" + r.map((h) => `"${h}"`).join(", ") + "]").join(",\n              ");
     const name = ($("#save-name").value.trim() || "custom").toLowerCase().replace(/[^a-z0-9]+/g, "_");
-    const geoNote = spec.center === "geo" ? `  # centred on ${p.prefix[0]}${p.center.ns} × ${p.prefix[1]}${p.center.ew} (${p.label})` : "";
-    const text = `# rows south -> north, colours west -> east${geoNote}\n"${name}": dict(fn=grid([${rows}],\n              xs=${JSON.stringify(xs)}, ys=${JSON.stringify(ys)}),\n           title="${name.replace(/_/g, " ")}"),`;
+    const geoNote = spec.center === "geo" ? `  # centered on ${p.prefix[0]}${p.center.ns} × ${p.prefix[1]}${p.center.ew} (${p.label})` : "";
+    const text = `# rows south -> north, colors west -> east${geoNote}\n"${name}": dict(fn=grid([${rows}],\n              xs=${JSON.stringify(xs)}, ys=${JSON.stringify(ys)}),\n           title="${name.replace(/_/g, " ")}"),`;
     copy(text, "Python scheme");
   });
   $("#copy-svg").addEventListener("click", () => {
@@ -923,7 +929,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     const specs = shownSpecs(), canRing = specs.some(ringable);
     $("#ring-controls").hidden = !canRing;
     $("#ring-note").textContent = specs.some((sp) => ringable(sp) && sp.kind === "grid")
-      ? "Each 45° moves every outer colour one place around the ring; in between, neighbours blend. The centre stays put."
+      ? "Each 45° moves every outer color one place around the ring; in between, neighbors blend. The center stays put."
       : "Turns every hue around the middle of the grid, by any angle.";
     if (!canRing) stopSpin();
     $("#orient-reset").disabled = isIdentity(state.orient);
@@ -1120,6 +1126,6 @@ const DATA = /*__PALETTE_DATA__*/null;
   // play through all palettes from the start, unless the visitor prefers reduced motion;
   // picking, editing, blending or turning a palette pauses it
   if (!reduceMotion) startTour();
-  window.__ipl = { makeFn, norm, DATA, orientSpec, ringable };  // used by the build-time colour check
+  window.__ipl = { makeFn, norm, DATA, orientSpec, ringable };  // used by the build-time color check
 })();
 </script>

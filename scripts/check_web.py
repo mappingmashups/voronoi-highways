@@ -1,8 +1,8 @@
-"""Check the palette page's JavaScript colours against the Python implementation.
+"""Check the palette page's JavaScript colors against the Python implementation.
 
 Run after `python scripts/export_web.py --check`: opens the built page in Chromium and
-compares every cell's colour for every preset on both route pairs (tolerance: 1/255), then
-checks the palette turning (quarter turns, mirrors and colour-ring turns) for consistency.
+compares every cell's color for every preset on both route pairs (tolerance: 1/255), then
+checks the palette turning (quarter turns, mirrors and color-ring turns) for consistency.
 Usage: python scripts/check_web.py [page.html or URL]   (default: output/web/voronoi_highways.html)
 """
 import json
@@ -45,7 +45,7 @@ ORIENT = """() => {
   for (const p of DATA.presets) {
     const f = makeFn(p.spec, pair);
     if (p.spec.kind === "grid") {
-      // grid turns rearrange the colours, so they stack: four quarter turns or two mirrors give it back
+      // grid turns rearrange the colors, so they stack: four quarter turns or two mirrors give it back
       let s = p.spec; for (let k = 0; k < 4; k++) s = orientSpec(s, {rot: 1, mirror: false, ring: 0});
       same(`${p.id} 4 quarter turns`, f, makeFn(s, pair));
       same(`${p.id} mirrored twice`, f, makeFn(orientSpec(orientSpec(p.spec, {rot: 0, mirror: true, ring: 0}), {rot: 0, mirror: true, ring: 0}), pair));
@@ -57,7 +57,7 @@ ORIENT = """() => {
     if (p.spec.kind !== "grid" || p.spec.center === "even") {
       same(`${p.id} 90° clockwise`, turned(p.spec, {rot: 1}), (u, v) => f(1 - v, u));
       same(`${p.id} 180°`, turned(p.spec, {rot: 2}), (u, v) => f(1 - u, 1 - v));
-      same(`${p.id} 90° anticlockwise`, turned(p.spec, {rot: 3}), (u, v) => f(v, 1 - u));
+      same(`${p.id} 90° counterclockwise`, turned(p.spec, {rot: 3}), (u, v) => f(v, 1 - u));
       same(`${p.id} mirror east–west`, turned(p.spec, {mirror: true}), (u, v) => f(1 - u, v));
       same(`${p.id} mirror north–south`, turned(p.spec, {mirror: true, rot: 2}), (u, v) => f(u, 1 - v));
     }

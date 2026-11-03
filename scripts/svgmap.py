@@ -8,7 +8,7 @@ from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon
 CRS = "EPSG:5070"  # NAD83 / Conus Albers
 WIDTH = 1200
 PAD = 20
-SIMPLIFY_M = 500  # metres, applied after projection
+SIMPLIFY_M = 500  # meters, applied after projection
 
 
 def rings(geom):

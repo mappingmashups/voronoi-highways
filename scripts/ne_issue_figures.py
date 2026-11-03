@@ -15,22 +15,22 @@ CRS = "EPSG:5070"
 SIZE = 760  # map panel, px
 
 BAD = "#d6246e"  # the problem feature
-GOOD = "#1f6fd1"  # related, correctly-labelled features
+GOOD = "#1f6fd1"  # related, correctly-labeled features
 GAP = "#f08c00"  # where a missing road should be
 
-# Each highlight: (name or None, (lat, lon) of one endpoint, colour, label)
+# Each highlight: (name or None, (lat, lon) of one endpoint, color, label)
 # Each gap: ((lat, lon), (lat, lon), label) -- drawn dashed between two dangling ends
 ISSUES = [
-    dict(slug="01_portland_i84_labelled_5", title="I-84 labelled as \"5\" east of Portland, OR",
+    dict(slug="01_portland_i84_labeled_5", title="I-84 labeled as \"5\" east of Portland, OR",
          center=(45.55, -122.45), radius_km=35,
          highlight=[("5", [(45.517, -122.677), (45.531, -122.557)], BAD, 'name="5" (should be 84)'),
                     ("5", (45.548, -122.222), BAD, 'name="5" (should be 84)'),
                     ("5", [(45.617, -122.666), (45.517, -122.677)], GOOD, "I-5"), ("84", (45.548, -122.222), GOOD, "I-84")]),
-    dict(slug="02_seattle_i90_labelled_5", title="I-90 (Mercer Island bridge) labelled as \"5\", Seattle, WA",
+    dict(slug="02_seattle_i90_labeled_5", title="I-90 (Mercer Island bridge) labeled as \"5\", Seattle, WA",
          center=(47.58, -122.25), radius_km=18,
          highlight=[("5", (47.580, -122.176), BAD, 'name="5" (should be 90)'),
                     ("5", [(47.592, -122.322), (47.831, -122.267)], GOOD, "I-5"), ("90", (47.509, -121.865), GOOD, "I-90")]),
-    dict(slug="03_chicago_i94_i57_labelled_55", title="I-94 (Dan Ryan / Bishop Ford) and I-57 labelled as \"55\", Chicago, IL",
+    dict(slug="03_chicago_i94_i57_labeled_55", title="I-94 (Dan Ryan / Bishop Ford) and I-57 labeled as \"55\", Chicago, IL",
          center=(41.70, -87.72), radius_km=30,
          highlight=[("55", (41.647, -87.524), BAD, 'name="55" (should be 94 / 90)'),
                     ("55", (41.627, -87.696), BAD, 'name="55" (should be 57)'),
@@ -39,18 +39,18 @@ ISSUES = [
          center=(41.63, -88.03), radius_km=30,
          highlight=[("55", (41.755, -87.856), GOOD, "I-55 ends here"), ("55", (40.536, -89.027), GOOD, "I-55 resumes")],
          gap=[((41.755, -87.856), (41.488, -88.196), "missing I-55 (~40 km)")]),
-    dict(slug="05_atlanta_i20_labelled_85_and_i85_missing", title="I-20 labelled \"85\" and I-85 missing south of downtown Atlanta, GA",
+    dict(slug="05_atlanta_i20_labeled_85_and_i85_missing", title="I-20 labeled \"85\" and I-85 missing south of downtown Atlanta, GA",
          center=(33.70, -84.43), radius_km=16,
          highlight=[("85", (33.763, -84.491), BAD, 'name="85" (should be 20)'),
                     ("20", (33.605, -85.829), GOOD, "I-20"), ("85", (33.062, -84.944), GOOD, "I-85"),
                     ("75", (32.850, -83.678), GOOD, "I-75 (shares I-85 here)")],
          gap=[((33.739, -84.388), (33.619, -84.485), "missing I-85 (I-75/85 to airport)")]),
-    dict(slug="06_wichita_kansas_turnpike_labelled_235", title="Kansas Turnpike (I-35) labelled as \"235\", Wichita, KS",
+    dict(slug="06_wichita_kansas_turnpike_labeled_235", title="Kansas Turnpike (I-35) labeled as \"235\", Wichita, KS",
          center=(37.72, -97.10), radius_km=35,
          highlight=[("235", (37.903, -96.846), BAD, 'name="235" (should be 35)'),
                     ("35", (37.091, -97.336), GOOD, "I-35"), ("235", (37.678, -97.183), GOOD, "I-235"),
                     ("135", (38.376, -97.621), GOOD, "I-135")]),
-    dict(slug="07_tulsa_i44_labelled_75_and_244", title="I-44 through Tulsa, OK labelled as \"75\" and \"244\"",
+    dict(slug="07_tulsa_i44_labeled_75_and_244", title="I-44 through Tulsa, OK labeled as \"75\" and \"244\"",
          center=(36.30, -95.65), radius_km=45,
          highlight=[("75", [(36.146, -95.987), (36.162, -95.975)], BAD, 'name="75" (no I-75 in OK)'),
                     ("75", [(36.113, -96.008), (36.146, -95.987)], BAD, ""),
@@ -69,12 +69,12 @@ ISSUES = [
          highlight=[(None, (36.045, -79.774), BAD, "level & name empty (I-40/85)"),
                     ("85", (35.793, -80.300), GOOD, "I-85"), ("40", (36.059, -79.166), GOOD, "I-40 (also I-85 east of here)"),
                     ("40", (36.097, -80.234), GOOD, "I-40")]),
-    dict(slug="11_nebraska_i80_labelled_70", title="I-80 near York, NE labelled as \"70\"",
+    dict(slug="11_nebraska_i80_labeled_70", title="I-80 near York, NE labeled as \"70\"",
          center=(40.82, -97.6), radius_km=60,
          highlight=[("70", [(40.821, -97.595), (40.823, -97.044)], BAD, 'name="70" (should be 80)'),
                     ("80", [(40.807, -98.385), (40.821, -97.595)], GOOD, "I-80"),
                     ("80", [(40.823, -97.044), (41.239, -95.905)], GOOD, "I-80")]),
-    dict(slug="12_fort_smith_i40_labelled_44", title="I-40 at Fort Smith, AR labelled as \"44\"",
+    dict(slug="12_fort_smith_i40_labeled_44", title="I-40 at Fort Smith, AR labeled as \"44\"",
          center=(35.48, -94.33), radius_km=20,
          highlight=[("44", [(35.472, -94.325), (35.467, -94.440)], BAD, 'name="44" (should be 40)'),
                     ("44", [(35.472, -94.325), (35.524, -94.222)], BAD, 'name="44" (should be 40)'),
@@ -146,44 +146,44 @@ def figure(issue, roads, land):
     near = roads[roads.intersects(bb)]
     for _, s in near[near.level == "Federal"].iterrows():
         svg.append(f'<path d="{d(s.geometry)}" fill="none" stroke="#d9cbb1" stroke-width="1"/>')
-    labelled = set()
+    labeled = set()
     for _, s in near[near.level == "State"].iterrows():
         svg.append(f'<path d="{d(s.geometry)}" fill="none" stroke="#e2e2e2" stroke-width="0.8"/>')
     for _, s in near[near.level.isna() | (near.level == "Interstate")].iterrows():
         svg.append(f'<path d="{d(s.geometry)}" fill="none" stroke="#8d8d8d" stroke-width="1.6"/>')
         name = s["name"] if isinstance(s["name"], str) else "∅"
         m = s.geometry.intersection(bb).representative_point() if not s.geometry.intersection(bb).is_empty else None
-        if m is not None and (name, round(m.x, -4), round(m.y, -4)) not in labelled:
-            labelled.add((name, round(m.x, -4), round(m.y, -4)))
+        if m is not None and (name, round(m.x, -4), round(m.y, -4)) not in labeled:
+            labeled.add((name, round(m.x, -4), round(m.y, -4)))
             svg.append(f'<text x="{X(m.x):.0f}" y="{Y(m.y):.0f}" class="ctx">{html.escape(name)}</text>')
 
     labels = []
-    for name, latlon, colour, label in issue.get("highlight", []):
+    for name, latlon, color, label in issue.get("highlight", []):
         hits = find(roads, name, latlon)
-        if colour == BAD and len(hits) != 1:
+        if color == BAD and len(hits) != 1:
             raise ValueError(f"problem feature {name} @ {latlon}: {len(hits)} matches")
-        w = 5 if colour == BAD else 3.5
+        w = 5 if color == BAD else 3.5
         for geom in hits.geometry:
-            svg.append(f'<path d="{d(geom)}" fill="none" stroke="{colour}" stroke-width="{w}" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>')
+            svg.append(f'<path d="{d(geom)}" fill="none" stroke="{color}" stroke-width="{w}" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>')
         if label:
             g = hits.geometry.union_all().intersection(bb)
             if g.is_empty:
                 continue
             g = max(getattr(g, "geoms", [g]), key=lambda part: part.length)
             m = g.interpolate(0.5, normalized=True) if g.geom_type == "LineString" else g.representative_point()
-            labels.append((X(m.x), Y(m.y), colour, label))
+            labels.append((X(m.x), Y(m.y), color, label))
     for a, b, label in issue.get("gap", []):
         pa, pb = proj(*a), proj(*b)
         svg.append(f'<path d="M{X(pa.x):.1f},{Y(pa.y):.1f}L{X(pb.x):.1f},{Y(pb.y):.1f}" stroke="{GAP}" stroke-width="4" stroke-dasharray="8 6" fill="none"/>')
         for p in (pa, pb):
             svg.append(f'<circle cx="{X(p.x):.1f}" cy="{Y(p.y):.1f}" r="7" fill="none" stroke="{GAP}" stroke-width="3"/>')
         labels.append(((X(pa.x) + X(pb.x)) / 2, (Y(pa.y) + Y(pb.y)) / 2, GAP, label))
-    for x, y, colour, label in labels:
+    for x, y, color, label in labels:
         x = min(max(x, 10), SIZE - 10)
         anchor = "end" if x > SIZE * 0.6 else "start"
         dx = -10 if anchor == "end" else 10
-        svg.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="4" fill="{colour}" stroke="#fff" stroke-width="1.5"/>')
-        svg.append(f'<text x="{x + dx:.0f}" y="{y + 5:.0f}" text-anchor="{anchor}" class="lab" fill="{colour}">{html.escape(label)}</text>')
+        svg.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="4" fill="{color}" stroke="#fff" stroke-width="1.5"/>')
+        svg.append(f'<text x="{x + dx:.0f}" y="{y + 5:.0f}" text-anchor="{anchor}" class="lab" fill="{color}">{html.escape(label)}</text>')
 
     lat, lon = issue["center"]
     legend = (f'<span style="color:{BAD}">■ problem feature</span> '
@@ -199,7 +199,7 @@ body{{margin:0;font:14px/1.35 -apple-system,Helvetica,Arial,sans-serif;width:{SI
 text.ctx{{font-size:11px;fill:#666;paint-order:stroke;stroke:#fff;stroke-width:3px}}
 text.lab{{font-size:13px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}}
 </style></head><body><div class="wrap"><h1>{html.escape(issue['title'])}</h1>
-<div class="sub">ne_10m_roads (v5.2.0-pre) · centred {lat:.2f}, {lon:.2f} · {2 * issue['radius_km']} km across</div>
+<div class="sub">ne_10m_roads (v5.2.0-pre) · centered {lat:.2f}, {lon:.2f} · {2 * issue['radius_km']} km across</div>
 <svg width="{SIZE}" height="{SIZE}" viewBox="0 0 {SIZE} {SIZE}" style="border:1px solid #ccc">{''.join(svg)}</svg>
 <div class="legend">{legend}</div></div></body></html>"""
 

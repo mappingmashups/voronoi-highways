@@ -1,4 +1,4 @@
-"""Bivariate map: overlay a north-south and an east-west nearest-route layer and colour
+"""Bivariate map: overlay a north-south and an east-west nearest-route layer and color
 each intersection by its pair of route numbers.
 
 Usage: python scripts/bivariate.py [ns_selection ew_selection [scheme ...]]
@@ -34,11 +34,11 @@ def norm(n):
 
 
 def grid(rows, xs=None, ys=None):
-    """Colour function from a grid of control colours, blended piecewise-bilinearly in OKLab.
+    """Color function from a grid of control colors, blended piecewise-bilinearly in OKLab.
 
-    rows: list of rows from south to north, each a list of colours from west to east.
+    rows: list of rows from south to north, each a list of colors from west to east.
     xs / ys: positions (0-1) of the columns / rows; evenly spaced by default
-    (2x2 = four corners, 3x3 adds midpoints and a centre).
+    (2x2 = four corners, 3x3 adds midpoints and a center).
     """
     lab = np.array([[hex_to_oklab(h) for h in row] for row in rows])  # [row, col, 3]
     nr, nc = lab.shape[:2]
@@ -58,12 +58,12 @@ def grid(rows, xs=None, ys=None):
 
 
 def corners(sw, nw, se, ne):
-    """2x2 grid from four corner colours."""
+    """2x2 grid from four corner colors."""
     return grid([[sw, se], [nw, ne]])
 
 
 def multiply(ew_ramp_end, ns_ramp_end):
-    """True 'ink' overlay: white->colour ramp per layer, multiplied (like stacking transparencies)."""
+    """True 'ink' overlay: white->color ramp per layer, multiplied (like stacking transparencies)."""
     a, b = hex_to_rgb(ew_ramp_end), hex_to_rgb(ns_ramp_end)
 
     def fn(u, v):
@@ -75,7 +75,7 @@ def multiply(ew_ramp_end, ns_ramp_end):
 
 
 def oklab_plane(lightness=0.80, chroma=0.13):
-    """Full-spectrum 2D colour map: u drives OKLab a (green->red), v drives b (blue->yellow)."""
+    """Full-spectrum 2D color map: u drives OKLab a (green->red), v drives b (blue->yellow)."""
     def fn(u, v):
         return oklab_to_hex([lightness, (2 * u - 1) * chroma, (2 * v - 1) * chroma])
     fn.spec = dict(kind="plane", lightness=lightness, chroma=chroma)
@@ -92,7 +92,7 @@ def hue_lightness():
 
 
 def compass(center="#ffffff"):
-    """3x3 compass grid: a hue in each direction, `center` colour in the middle."""
+    """3x3 compass grid: a hue in each direction, `center` color in the middle."""
     return [["#d1495b", "#f08c2e", "#e8c52a"],
             ["#8a5fc4", center, "#5fae5a"],
             ["#3d5fc4", "#2f8fc7", "#2aa39a"]]
@@ -102,10 +102,10 @@ COMPASS = compass()
 GRAY, BLACK = "#8f8f8f", "#000000"
 LIGHT_ROUTES = dict(stroke="#ffffff", opacity=0.55)  # for schemes with a dark middle
 
-# Geographic centre of the contiguous US (near Lebanon, Kansas)
+# Geographic center of the contiguous US (near Lebanon, Kansas)
 US_CENTER = (39.8283, -98.5795)
 
-# ring=True marks schemes whose outer colours run around a hue wheel (the compasses and the
+# ring=True marks schemes whose outer colors run around a hue wheel (the compasses and the
 # full-spectrum plane): the palette page lets you turn those by any angle, not only 90°.
 SCHEMES = {
     "yellow_blue": dict(fn=corners(sw="#ffffff", nw="#2f6fd6", se="#f2cc0c", ne="#2f9a4a"),
@@ -113,10 +113,10 @@ SCHEMES = {
     "cmy_multiply": dict(fn=multiply(ew_ramp_end="#00b7eb", ns_ramp_end="#ffe600"),
                          title="Cyan (north) × yellow (east) ink overlay (multiply blend)"),
     "pink_teal": dict(fn=corners(sw="#e8e8e8", nw="#be64ac", se="#5ac8c8", ne="#3b4994"),
-                      title="Classic bivariate: grey, pink (north), teal (east), indigo (north-east)"),
+                      title="Classic bivariate: gray, pink (north), teal (east), indigo (northeast)"),
     "orange_purple": dict(fn=corners(sw="#f3f3f3", nw="#f0a030", se="#8e6cc8", ne="#9b2a3a"),
-                          title="Orange (north) × purple (east) → burgundy north-east"),
-    # --- 3x2 and 3x3 control grids (rows south -> north, colours west -> east) ---
+                          title="Orange (north) × purple (east) → burgundy northeast"),
+    # --- 3x2 and 3x3 control grids (rows south -> north, colors west -> east) ---
     "coasts_3x2": dict(fn=grid([["#d9643f", "#f6f1e7", "#f2c40c"],
                                 ["#2f62c8", "#cfd8e6", "#2f9a4a"]]),
                        title="3×2 coasts: terracotta SW, yellow SE, blue NW, green NE; muted interior"),
@@ -125,19 +125,19 @@ SCHEMES = {
                                    ["#2f62b8", "#6e8ea6", "#25744a"]]),
                           title="3×3 landscape: desert, wheat, sun / sage, cream, meadow / rain, slate, forest"),
     "compass_3x3": dict(fn=grid(COMPASS), ring=True,
-                        title="3×3 compass: white centre of the grid, a different hue in every direction"),
-    # same colours, but the white centre sits at the route numbers found at the
-    # geographic centre of the lower 48 (fn is built per map pair, see centred_fn)
+                        title="3×3 compass: white center of the grid, a different hue in every direction"),
+    # same colors, but the white center sits at the route numbers found at the
+    # geographic center of the lower 48 (fn is built per map pair, see centered_fn)
     "compass_centered": dict(rows=COMPASS, centered=True, ring=True,
-                             title="3×3 compass, white at the geographic centre of the lower 48"),
+                             title="3×3 compass, white at the geographic center of the lower 48"),
     "compass_gray": dict(fn=grid(compass(GRAY)), ring=True,
-                         title="3×3 compass, grey centre of the grid"),
+                         title="3×3 compass, gray center of the grid"),
     "compass_black": dict(fn=grid(compass(BLACK)), routes=LIGHT_ROUTES, ring=True,
-                          title="3×3 compass, black centre of the grid"),
+                          title="3×3 compass, black center of the grid"),
     "compass_centered_gray": dict(rows=compass(GRAY), centered=True, ring=True,
-                                  title="3×3 compass, grey at the geographic centre of the lower 48"),
+                                  title="3×3 compass, gray at the geographic center of the lower 48"),
     "compass_centered_black": dict(rows=compass(BLACK), centered=True, routes=LIGHT_ROUTES, ring=True,
-                                   title="3×3 compass, black at the geographic centre of the lower 48"),
+                                   title="3×3 compass, black at the geographic center of the lower 48"),
     "stevens_pink_teal_3x3": dict(fn=grid([["#e8e8e8", "#ace4e4", "#5ac8c8"],
                                            ["#dfb0d6", "#a5add3", "#5698b9"],
                                            ["#be64ac", "#8c62aa", "#3b4994"]]),
@@ -181,11 +181,11 @@ def center_value(routes, center, axis):
     return value, (n_lo, d_lo), (n_hi, d_hi)
 
 
-def centred_fn(scheme, ns, ew, roads):
+def centered_fn(scheme, ns, ew, roads):
     center = gpd.GeoSeries([Point(US_CENTER[1], US_CENTER[0])], crs=4326).to_crs(CRS).iloc[0]
     cu, w, e = center_value(routes_for(ns, roads), center, "x")
     cv, so, no = center_value(routes_for(ew, roads), center, "y")
-    print(f"  centre: N-S {cu:.1f} (between {w[0]} at {w[1] / 1000:.0f} km W and {e[0]} at {e[1] / 1000:.0f} km E), "
+    print(f"  center: N-S {cu:.1f} (between {w[0]} at {w[1] / 1000:.0f} km W and {e[0]} at {e[1] / 1000:.0f} km E), "
           f"E-W {cv:.1f} (between {so[0]} at {so[1] / 1000:.0f} km S and {no[0]} at {no[1] / 1000:.0f} km N)")
     fn = grid(SCHEMES[scheme]["rows"], xs=[0, norm(cu), 1], ys=[0, norm(cv), 1])
     pre_ns, pre_ew = PREFIX[SELECTIONS[ns]["level"]], PREFIX[SELECTIONS[ew]["level"]]
@@ -195,7 +195,7 @@ def centred_fn(scheme, ns, ew, roads):
 
 def render(ns, ew, scheme, outline, combo, roads):
     if SCHEMES[scheme].get("centered"):
-        fn, title = centred_fn(scheme, ns, ew, roads)
+        fn, title = centered_fn(scheme, ns, ew, roads)
     else:
         fn, title = SCHEMES[scheme]["fn"], SCHEMES[scheme]["title"]
     ns_nums = sorted(combo.ns.unique())
@@ -206,9 +206,9 @@ def render(ns, ew, scheme, outline, combo, roads):
     m = SvgMap(outline.total_bounds, extra_bottom=legend_h)
     m.add('<g id="cells" stroke="none">')
     for _, r in combo.iterrows():
-        colour = fn(norm(r.ns), norm(r.ew))
-        m.add(f'  <path id="cell-{r.ns}-{r.ew}" d="{m.area_d(r.geometry)}" fill="{colour}" '
-              f'stroke="{colour}" stroke-width="0.3" fill-rule="evenodd"/>')
+        color = fn(norm(r.ns), norm(r.ew))
+        m.add(f'  <path id="cell-{r.ns}-{r.ew}" d="{m.area_d(r.geometry)}" fill="{color}" '
+              f'stroke="{color}" stroke-width="0.3" fill-rule="evenodd"/>')
     m.add("</g>")
     m.add(f'<path id="outline" d="{m.area_d(outline.geometry.iloc[0])}" fill="none" stroke="#7a7a7a" '
           f'stroke-width="0.75" stroke-linejoin="round"/>')

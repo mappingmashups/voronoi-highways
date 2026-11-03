@@ -3,7 +3,7 @@
 Writes web/palette_data.json, then builds output/web/voronoi_highways.html from
 web/palette_template.html by inlining that JSON. Also writes a standalone copy to
 docs/index.html (with its own <head>), which GitHub Pages serves from the docs/ folder. Optionally (--check) also writes the
-Python-computed colour of every cell for every preset, to test the page's JS port against.
+Python-computed color of every cell for every preset, to test the page's JS port against.
 """
 import json
 import sys
@@ -62,9 +62,9 @@ PAIRS = [("x5_odd", "x10", "Major routes", "I-5 … I-95 (odd, ÷5) × I-10 … 
 NAMES = {
     "yellow_blue": "Blue × yellow", "cmy_multiply": "Cyan × yellow ink", "pink_teal": "Pink × teal",
     "orange_purple": "Orange × purple", "coasts_3x2": "Coasts 3×2", "landscape_3x3": "Landscape 3×3",
-    "compass_3x3": "Compass", "compass_centered": "Compass, centred",
-    "compass_gray": "Compass, grey", "compass_centered_gray": "Compass, grey, centred",
-    "compass_black": "Compass, black", "compass_centered_black": "Compass, black, centred",
+    "compass_3x3": "Compass", "compass_centered": "Compass, centered",
+    "compass_gray": "Compass, gray", "compass_centered_gray": "Compass, gray, centered",
+    "compass_black": "Compass, black", "compass_centered_black": "Compass, black, centered",
     "stevens_pink_teal_3x3": "Stevens pink × teal", "stevens_green_blue_3x3": "Stevens blue × green",
     "spectrum": "Full spectrum", "hue_lightness": "Rainbow × darkness",
 }
@@ -79,8 +79,8 @@ def preset_specs():
             spec = dict(s["fn"].spec)
             if spec["kind"] == "grid":
                 spec["center"] = "even"
-                spec.pop("xs"), spec.pop("ys")  # all non-centred grids are evenly spaced
-        if s.get("ring"):  # outer colours form a hue wheel: the page can turn them by any angle
+                spec.pop("xs"), spec.pop("ys")  # all non-centered grids are evenly spaced
+        if s.get("ring"):  # outer colors form a hue wheel: the page can turn them by any angle
             spec["ring"] = True
         light = s.get("routes", {}).get("stroke", "").lower() == "#ffffff"
         out.append(dict(id=key, name=NAMES.get(key, key), title=s["title"], spec=spec,
@@ -144,9 +144,9 @@ def main():
     for ns, ew, label, desc in PAIRS:
         pd_, combo = pair_data(ns, ew, label, desc, outline, roads)
         pairs.append(pd_)
-        if "--check" in sys.argv:  # reference colours from the Python implementation
+        if "--check" in sys.argv:  # reference colors from the Python implementation
             for key, s in bv.SCHEMES.items():
-                fn = bv.centred_fn(key, ns, ew, roads)[0] if s.get("centered") else s["fn"]
+                fn = bv.centered_fn(key, ns, ew, roads)[0] if s.get("centered") else s["fn"]
                 check[f"{pd_['id']}/{key}"] = [fn(bv.norm(c["ns"]), bv.norm(c["ew"])) for c in pd_["cells"]]
     data = dict(scale=list(bv.SCALE), presets=preset_specs(), pairs=pairs)
     WEB.mkdir(exist_ok=True)

@@ -1,4 +1,4 @@
-"""sRGB <-> OKLab conversions and helpers for blending colours perceptually."""
+"""sRGB <-> OKLab conversions and helpers for blending colors perceptually."""
 import numpy as np
 
 
