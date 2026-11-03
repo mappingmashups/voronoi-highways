@@ -8,6 +8,10 @@ Every point in the lower 48 is assigned to its nearest highway from a chosen set
 |---|---|
 | ![Nearest Interstate, odd and divisible by 5](docs/images/nearest_interstate_x5.png) | ![Bivariate map of all Interstates](docs/images/bivariate_compass_centered.png) |
 
+![The grey-centred compass palette turning one full revolution around its colour ring](docs/images/compass_centered_gray_spin.gif)
+
+*The major-routes map with the grey-centred compass palette, turning once around its colour ring. Try it on the [palette page](https://mappingmashups.github.io/voronoi-highways/).*
+
 ## Setup
 
 Python 3.11+.
@@ -62,11 +66,11 @@ For bivariate maps, the north–south and east–west region layers are intersec
 
 - pick, edit and save palettes;
 - fade automatically through all of them, or blend any two by hand;
-- view the major-route and all-Interstate maps on their own or side by side.
-- turn any palette in 90° steps or mirror it; the compass palettes and Full spectrum can also turn their colour ring by any angle, or spin.
+- view the major-route and all-Interstate maps on their own or side by side;
+- turn any palette in 90° steps or mirror it; the compass palettes and Full spectrum can also turn their colour ring by any angle, or spin;
 - hover or tap a region to read its two route numbers and trace both routes along their full length.
 
-"Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
+"Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `python scripts/spin_gif.py [palette]` records a ring palette turning one full revolution as a GIF (the one above is the default, `compass_centered_gray`); it uses ffmpeg when it's installed, for a file about half the size. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
 
 The page is published with GitHub Pages at **https://mappingmashups.github.io/voronoi-highways/**, served from `docs/index.html` on `main`. `export_web.py` writes that file too, as a standalone copy with its own `<head>`. It's committed rather than built on GitHub, so after changing schemes, data or the template, rebuild it and commit `docs/index.html`:
 
