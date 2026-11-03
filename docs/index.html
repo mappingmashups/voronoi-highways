@@ -70,9 +70,14 @@ h1 { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.15rem); font-weight: 800; margin
 .view-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 800; }
 .view-label span { text-transform: none; letter-spacing: 0; font-weight: 400; }
 .map-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; min-width: 0; }
-.map-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
-.now { font-weight: 800; font-size: 1.1rem; }
-.now-sub { color: var(--muted); font-size: 0.86rem; }
+/* fixed-height header: name on one line, description always two lines, network switch pinned right,
+   so the map below never moves as palettes change (e.g. during the tour) */
+.map-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: start; }
+.map-head > .seg { white-space: nowrap; }
+@media (max-width: 640px) { .map-head { grid-template-columns: minmax(0, 1fr); } .map-head > .seg { justify-self: start; } }
+.now { font-weight: 800; font-size: 1.1rem; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-sub { color: var(--muted); font-size: 0.86rem; line-height: 1.35; height: calc(2 * 1.35em);
+           display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
 .map { width: 100%; height: auto; display: block; touch-action: manipulation; }
 .map .cell { cursor: crosshair; }
 .map .cell.hl { stroke: var(--ink) !important; stroke-width: 2.2 !important; }
@@ -192,7 +197,7 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
     <div class="stage" id="stage">
       <div class="map-card">
         <div class="map-head">
-          <div>
+          <div style="min-width: 0">
             <div class="now" id="now-name">Blue × yellow</div>
             <div class="now-sub" id="now-title"></div>
           </div>
@@ -628,12 +633,14 @@ const DATA = {"scale":[0,100],"presets":[{"id":"yellow_blue","name":"Blue × yel
     $("#now-name").textContent = extra || pal.name;
     let sub = pal.title || "";
     if (pal.spec && pal.spec.kind === "grid" && pal.spec.center === "geo") {
-      const at = views.map((v) => `${v.pair.prefix[0]}${v.pair.center.ns} × ${v.pair.prefix[1]}${v.pair.center.ew}` + (views.length > 1 ? ` (${v.pair.label.toLowerCase()})` : ""));
-      sub += `. Centre falls at ${at.join(" and ")}.`;
+      const at = views.map((v) => `${v.pair.prefix[0]}${v.pair.center.ns} × ${v.pair.prefix[1]}${v.pair.center.ew}` + (views.length > 1 ? ` (${v.pair.label.split(" ")[0].toLowerCase()})` : ""));
+      sub += `. Centre at ${at.join(", ")}.`;
     }
     const turned = pal.spec ? describeOrient(pal.spec, state.orient) : "";
     if (turned) sub += (sub.endsWith(".") ? " " : ". ") + turned;
     $("#now-title").textContent = sub;
+    $("#now-title").title = sub;          // the box shows two lines; hover for all of it
+    $("#now-name").title = extra || pal.name;
   }
   function updateCenterMarker(pal) {
     // the marker shows the geographic centre, so only when the palette is centred on it
@@ -1138,6 +1145,9 @@ const DATA = {"scale":[0,100],"presets":[{"id":"yellow_blue","name":"Blue × yel
   state.custom = DATA.presets[0].spec;
   setMode("major");
   loadEditor(DATA.presets[0]);
+  // play through all palettes from the start, unless the visitor prefers reduced motion;
+  // picking, editing, blending or turning a palette pauses it
+  if (!reduceMotion) startTour();
   window.__ipl = { makeFn, norm, DATA, orientSpec, ringable };  // used by the build-time colour check
 })();
 </script>
