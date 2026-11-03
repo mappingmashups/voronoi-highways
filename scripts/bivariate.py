@@ -190,13 +190,12 @@ def centred_fn(scheme, ns, ew, roads):
     fn = grid(SCHEMES[scheme]["rows"], xs=[0, norm(cu), 1], ys=[0, norm(cv), 1])
     pre_ns, pre_ew = PREFIX[SELECTIONS[ns]["level"]], PREFIX[SELECTIONS[ew]["level"]]
     title = f"{SCHEMES[scheme]['title']} ({pre_ns}{cu:.1f} × {pre_ew}{cv:.1f})"
-    return fn, title, center
+    return fn, title
 
 
 def render(ns, ew, scheme, outline, combo, roads):
-    center = None
     if SCHEMES[scheme].get("centered"):
-        fn, title, center = centred_fn(scheme, ns, ew, roads)
+        fn, title = centred_fn(scheme, ns, ew, roads)
     else:
         fn, title = SCHEMES[scheme]["fn"], SCHEMES[scheme]["title"]
     ns_nums = sorted(combo.ns.unique())
@@ -242,12 +241,6 @@ def render(ns, ew, scheme, outline, combo, roads):
     m.add(f'  <text x="{xr}" y="{y0 + 30}">→ east: north–south route ({pre_ns}{ns_nums[0]}…{ns_nums[-1]})</text>')
     m.add(f'  <text x="{xr}" y="{y0 + 48}" fill="#777">small squares: combinations that don’t occur on the map</text>')
     m.add("</g>")
-    if center is not None:  # mark the point the colours are centred on
-        x, y = m.xy(center.x, center.y)
-        m.add(f'<g id="center" font-family="{FONT}" font-size="11" fill="#222">'
-              f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>'
-              f'<text x="{x + 8:.1f}" y="{y - 6:.1f}" paint-order="stroke" stroke="#fff" stroke-width="3">'
-              f'geographic centre</text></g>')
     m.save(OUT / f"{ns}__{ew}__{scheme}.svg")
 
 

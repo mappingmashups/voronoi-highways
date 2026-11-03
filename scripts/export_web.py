@@ -95,14 +95,12 @@ def pair_data(ns, ew, label, desc, outline, roads):
     center = gpd.GeoSeries([Point(bv.US_CENTER[1], bv.US_CENTER[0])], crs=4326).to_crs(CRS).iloc[0]
     cu = bv.center_value(bv.routes_for(ns, roads), center, "x")[0]
     cv = bv.center_value(bv.routes_for(ew, roads), center, "y")[0]
-    cx, cy = m.xy(center.x, center.y)
     extra = dict(electoral=electoral_data(m, combo)) if (ns, ew) == ("x5_odd", "x10") and ELECTORAL.exists() else {}
     return dict(
         id=f"{ns}__{ew}", label=label, desc=desc,
         prefix=[PREFIX[SELECTIONS[ns]["level"]], PREFIX[SELECTIONS[ew]["level"]]],
         ns=sorted({c["ns"] for c in cells}), ew=sorted({c["ew"] for c in cells}),
-        center=dict(u=round(bv.norm(cu), 4), v=round(bv.norm(cv), 4), ns=round(cu, 1), ew=round(cv, 1),
-                    x=round(cx, 1), y=round(cy, 1)),
+        center=dict(u=round(bv.norm(cu), 4), v=round(bv.norm(cv), 4), ns=round(cu, 1), ew=round(cv, 1)),
         width=m.width, height=m.map_height,
         outline=m.area_d(outline.geometry.iloc[0]),
         routes_ns=route_paths(m, bv.routes_for(ns, roads)),

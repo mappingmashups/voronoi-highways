@@ -56,7 +56,6 @@ def main():
         page.wait_for_timeout(600)
         page.click(f'.preset[data-id="{args.palette}"]')
         page.wait_for_timeout(2000)  # let the palette's fade-in and route-line colour settle
-        page.uncheck("#show-center")  # no centre marker
         mapsvg = page.locator("#views .map").first
         for k in range(args.frames):
             page.evaluate(SET_RING, [args.palette, k * 360 / args.frames])

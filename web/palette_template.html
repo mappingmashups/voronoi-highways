@@ -288,7 +288,6 @@ footer { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
             <option value="light">Light</option>
             <option value="off">Hidden</option>
           </select>
-          <label><input type="checkbox" id="show-center" checked> Mark centre</label>
         </div>
         <div class="row">
           <input type="text" id="save-name" placeholder="Name this palette" aria-label="Palette name" style="flex:1 1 140px;min-width:0">
@@ -462,7 +461,6 @@ const DATA = /*__PALETTE_DATA__*/null;
     custom: null,                   // spec of the editor's palette
     saved: loadSaved(),
     routesMode: "auto",
-    showCenter: true,
     orient: { ...IDENTITY },        // applied on top of whatever palette is showing
     anim: null,
     tour: { playing: false, timer: null, index: 0 },
@@ -499,7 +497,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     const legend = el("svg", { class: "legend", "aria-label": "Colour legend: north–south route across, east–west route up" }, wrap);
     card.append(label, svg, note, wrap);
     const v = { pairIdx, pair: p, card, svg, legend, note, cellEls: [], legendEls: [], legendIndex: new Map(),
-                routeEls: [], routeByKey: null, routeHl: null, centerEl: null, shown: null };
+                routeEls: [], routeByKey: null, routeHl: null, shown: null };
     buildMap(v); buildLegend(v);
     const onCell = (e) => { const i = e.target.dataset && e.target.dataset.i; if (i !== undefined) showReadout(v, +i); };
     svg.addEventListener("pointerover", onCell);
@@ -531,9 +529,6 @@ const DATA = /*__PALETTE_DATA__*/null;
       }
     }
     v.routeHl = el("g", { fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", "pointer-events": "none" }, v.svg);
-    v.centerEl = el("g", {}, v.svg);
-    el("circle", { cx: p.center.x, cy: p.center.y, r: 5, fill: "#fff", stroke: "#111", "stroke-width": 1.6 }, v.centerEl);
-    el("circle", { cx: p.center.x, cy: p.center.y, r: 1.6, fill: "#111" }, v.centerEl);
   }
 
   function buildLegend(v) {
@@ -627,12 +622,6 @@ const DATA = /*__PALETTE_DATA__*/null;
     $("#now-title").title = sub;          // the box shows two lines; hover for all of it
     $("#now-name").title = extra || pal.name;
   }
-  function updateCenterMarker(pal) {
-    // the marker shows the geographic centre, so only when the palette is centred on it
-    const spec = pal && pal.spec;
-    const geo = spec && spec.kind === "grid" && spec.center === "geo";
-    views.forEach((v) => (v.centerEl.style.display = state.showCenter && geo ? "" : "none"));
-  }
 
   let hlEls = [];
   function highlight(key) {
@@ -710,7 +699,6 @@ const DATA = /*__PALETTE_DATA__*/null;
     const pal = paletteById(id);
     markActive();
     setNow(pal);
-    updateCenterMarker(pal);
     if (loadEditorToo && id !== "custom") loadEditor(pal);
     updateOrientUI();
     animateTo(targetsFor(pal), animate ? fadeSeconds() : 0);
@@ -737,7 +725,7 @@ const DATA = /*__PALETTE_DATA__*/null;
         $("#tour-progress").style.width = (t * 100).toFixed(1) + "%";
         if (t < 1) { state.tour.timer = requestAnimationFrame(tick); return; }
         i = (i + 1) % list.length;
-        state.active = nxt.id; markActive(); setNow(nxt); updateCenterMarker(nxt); updateOrientUI();
+        state.active = nxt.id; markActive(); setNow(nxt); updateOrientUI();
         animateTo(targetsFor(nxt), fadeSeconds(), () => { loadEditor(nxt); next(); });
       };
       state.tour.timer = requestAnimationFrame(tick);
@@ -775,7 +763,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     paintAll(mixAll(targetsFor(a), targetsFor(b), t));
     const name = t <= 0 ? a.name : t >= 1 ? b.name : `${a.name} → ${b.name} (${Math.round(t * 100)}%)`;
     state.active = t <= 0 ? a.id : t >= 1 ? b.id : null;
-    markActive(); setNow(t >= 1 ? b : a, name); updateCenterMarker(t >= 0.5 ? b : a); updateOrientUI();
+    markActive(); setNow(t >= 1 ? b : a, name); updateOrientUI();
   }
   ["#blend", "#blend-a", "#blend-b"].forEach((s) => $(s).addEventListener("input", applyBlend));
 
@@ -828,7 +816,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     state.custom = editorSpec();
     state.active = "custom";
     const pal = paletteById("custom");
-    markActive(); setNow(pal, "Custom palette"); updateCenterMarker(pal); updateOrientUI();
+    markActive(); setNow(pal, "Custom palette"); updateOrientUI();
     animateTo(targetsFor(pal), animate ? Math.min(fadeSeconds(), 0.6) : 0);
   }
   function resize() {
@@ -857,7 +845,6 @@ const DATA = /*__PALETTE_DATA__*/null;
     const pal = paletteById(state.active || $("#blend-a").value);
     if (state.active) animateTo(targetsFor(pal), 0); else applyBlend();
   });
-  $("#show-center").addEventListener("change", () => { state.showCenter = $("#show-center").checked; updateCenterMarker(paletteById(state.active || "custom")); });
 
   // ---------- save / copy ----------
   function toast(msg) { $("#toast").textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => ($("#toast").textContent = ""), 3500); }
@@ -1018,7 +1005,7 @@ const DATA = /*__PALETTE_DATA__*/null;
     $("#readout").innerHTML = '<span class="hint">Hover or tap a map to read a region’s two route numbers.</span>';
     if (!state.active) { applyBlend(); return; }  // mid-blend: keep the same mix
     const pal = paletteById(state.active) || DATA.presets[0];
-    setNow(pal); updateCenterMarker(pal); updateOrientUI();
+    setNow(pal); updateOrientUI();
     paintAll(targetsFor(pal));
   }
   for (const m of Object.keys(MODES)) $("#mode-" + m).addEventListener("click", () => setMode(m));
