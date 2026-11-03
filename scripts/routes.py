@@ -64,7 +64,7 @@ def split_at_junctions(segs):
 
 
 def assign_routes(segs, max_gap=MAX_GAP_M):
-    """segs: projected (metres) GeoDataFrame of LineStrings with `name` (and optional
+    """segs: projected (meters) GeoDataFrame of LineStrings with `name` (and optional
     `namealt`). Returns a list of sets of route numbers, one per row, and a bridge log."""
     segs = segs.reset_index(drop=True)
     routes = [set() for _ in range(len(segs))]
@@ -142,7 +142,7 @@ def assign_routes(segs, max_gap=MAX_GAP_M):
                 x, y = node_xy[a]
                 log.append((num, d, length, via, (x, y)))
 
-        # drop tiny isolated fragments (e.g. a mislabelled stub far from the real route),
+        # drop tiny isolated fragments (e.g. a mislabeled stub far from the real route),
         # but never a short route's only / longest piece
         pieces = [{k for _, _, k in sub.subgraph(c).edges(keys=True)} for c in nx.connected_components(sub)]
         lengths = [sum(seg_len(k) for k in keys) for keys in pieces]

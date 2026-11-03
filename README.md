@@ -2,15 +2,15 @@
 
 Voronoi polygon experiments creating colorful maps of the USA based on distance to the nearest highway.
 
-Every point in the lower 48 is assigned to its nearest highway from a chosen set: for example, the north–south Interstates numbered 5, 15, 25 … 95. The result is coloured by route number. Interstate numbers follow a grid: odd numbers run north–south and increase west to east, and even numbers run east–west and increase south to north. Overlaying a north–south map with an east–west map makes a **bivariate** map, where each place's colour comes from its pair of nearest routes.
+Every point in the lower 48 is assigned to its nearest highway from a chosen set: for example, the north–south Interstates numbered 5, 15, 25 … 95. The result is colored by route number. Interstate numbers follow a grid: odd numbers run north–south and increase west to east, and even numbers run east–west and increase south to north. Overlaying a north–south map with an east–west map makes a **bivariate** map, where each place's color comes from its pair of nearest routes.
 
 | Nearest of I-5, 15, 25 … 95 | All odd × all even Interstates, compass palette |
 |---|---|
 | ![Nearest Interstate, odd and divisible by 5](docs/images/nearest_interstate_x5.png) | ![Bivariate map of all Interstates](docs/images/bivariate_compass_centered.png) |
 
-![The grey-centred compass palette turning one full revolution around its colour ring](docs/images/compass_centered_gray_spin.gif)
+![The gray-centered compass palette turning one full revolution around its color ring](docs/images/compass_centered_gray_spin.gif)
 
-*The major-routes map with the grey-centred compass palette, turning once around its colour ring. Try it on the [palette page](https://mappingmashups.github.io/voronoi-highways/).*
+*The major-routes map with the gray-centered compass palette, turning once around its color ring. Try it on the [palette page](https://mappingmashups.github.io/voronoi-highways/).*
 
 ## Setup
 
@@ -50,7 +50,7 @@ Step 5 needs both of its selections from step 4. The defaults are `x5_odd x10`; 
 | `us_odd` | odd US highways up to US 101 |
 | `us_even` | even US highways under 100 |
 
-Interstates and US highways are never mixed. Colours come from a lookup of each route number on a fixed 0–100 scale, not from its rank in the list. That keeps colours consistent between selections whose numbers are spaced unevenly.
+Interstates and US highways are never mixed. Colors come from a lookup of each route number on a fixed 0–100 scale, not from its rank in the list. That keeps colors consistent between selections whose numbers are spaced unevenly.
 
 ### How the nearest-route regions are built
 
@@ -58,7 +58,7 @@ Interstates and US highways are never mixed. Colours come from a lookup of each 
 2. Voronoi cells are built around those points in Conus Albers (EPSG:5070).
 3. The cells are dissolved by route number and clipped to the lower-48 outline.
 
-For bivariate maps, the north–south and east–west region layers are intersected. Each piece then carries both numbers, and a colour function turns the pair into a colour. Colour schemes live in `SCHEMES` in `scripts/bivariate.py`. Most are grids of control colours (2×2 up to 5×5) blended in OKLab, and a grid's middle can be moved, for example to the geographic centre of the lower 48.
+For bivariate maps, the north–south and east–west region layers are intersected. Each piece then carries both numbers, and a color function turns the pair into a color. Color schemes live in `SCHEMES` in `scripts/bivariate.py`. Most are grids of control colors (2×2 up to 5×5) blended in OKLab, and a grid's middle can be moved, for example to the geographic center of the lower 48.
 
 ### Palette page
 
@@ -67,10 +67,10 @@ For bivariate maps, the north–south and east–west region layers are intersec
 - pick, edit and save palettes;
 - fade automatically through all of them (this starts on its own when the page opens, unless the browser asks for reduced motion, and pauses as soon as you pick or change a palette), or blend any two by hand;
 - view the major-route and all-Interstate maps on their own or side by side;
-- turn any palette in 90° steps or mirror it; the compass palettes and Full spectrum can also turn their colour ring by any angle, or spin;
+- turn any palette in 90° steps or mirror it; the compass palettes and Full spectrum can also turn their color ring by any angle, or spin;
 - hover or tap a region to read its two route numbers and trace both routes along their full length.
 
-"Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `python scripts/spin_gif.py [palette]` records a ring palette turning one full revolution as a GIF (the one above is the default, `compass_centered_gray`); it uses ffmpeg when it's installed, for a file about half the size. `check_web.py` confirms that the page's JavaScript colours match the Python ones to within 1/255.
+"Copy for bivariate.py" turns a palette made on the page into a `SCHEMES` entry. `python scripts/spin_gif.py [palette]` records a ring palette turning one full revolution as a GIF (the one above is the default, `compass_centered_gray`); it uses ffmpeg when it's installed, for a file about half the size. `check_web.py` confirms that the page's JavaScript colors match the Python ones to within 1/255.
 
 The page is published with GitHub Pages at **https://mappingmashups.github.io/voronoi-highways/**, served from `docs/index.html` on `main`. `export_web.py` writes that file too, as a standalone copy with its own `<head>`. It's committed rather than built on GitHub, so after changing schemes, data or the template, rebuild it and commit `docs/index.html`:
 
@@ -87,7 +87,7 @@ python scripts/check_web.py docs/index.html
 
 On the palette page, type `538`, click the shield in the header, or open the page with `#538` at the end of its URL to treat the 54 zones of the major-routes map as states and replay the 2024 presidential election. `python scripts/electoral.py` makes the numbers behind it:
 
-- **Population:** Census 2020 block-group centres of population, each counted in the zone it falls in.
+- **Population:** Census 2020 block-group centers of population, each counted in the zone it falls in.
 - **Votes:** 2024 county results compiled by [Tony McGovern](https://github.com/tonmcg/US_County_Level_Election_Results_08-24), shared out within each county by block-group population. Connecticut (planning regions) and DC (wards) are shared out state-wide.
 - **Names:** each zone is named after its largest city, the Natural Earth populated place with the biggest `POP_MAX` inside it (or the nearest one, for two tiny zones with none). The map marks each city with a dot and its name.
 - **Electoral votes:** 2 per zone plus 430 House seats by Huntington–Hill (at least 1 each), for 538 in all. Winner takes all.
@@ -98,7 +98,7 @@ It reads the committed polygons in `results/` and writes `results/electoral_x5_o
 
 ## Natural Earth data fixes
 
-Natural Earth stores one route number per road segment, and some segments are mislabelled. `prepare.py` works around this as follows:
+Natural Earth stores one route number per road segment, and some segments are mislabeled. `prepare.py` works around this as follows:
 
 - **Shared stretches:** routes that share pavement (I-55/I-70 through St. Louis, I-20/I-59 between Birmingham and Meridian, and so on) are reconstructed by finding paths through the network between a route's loose ends. Short gaps are closed with marked connector lines.
 - **Known mislabels:** these are fixed from a table (`FIXES`), and state routes tagged as US highways are reclassified.
@@ -116,4 +116,4 @@ docs/         Natural Earth issue write-up and figures
 data/, output/  generated, git-ignored
 ```
 
-Data: [Natural Earth](https://www.naturalearthdata.com/), public domain. Easter egg: Natural Earth populated places; US Census Bureau 2020 centres of population; 2024 county results compiled by [Tony McGovern](https://github.com/tonmcg/US_County_Level_Election_Results_08-24).
+Data: [Natural Earth](https://www.naturalearthdata.com/), public domain. Easter egg: Natural Earth populated places; US Census Bureau 2020 centers of population; 2024 county results compiled by [Tony McGovern](https://github.com/tonmcg/US_County_Level_Election_Results_08-24).

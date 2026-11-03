@@ -1,8 +1,8 @@
-"""Nearest-route regions: colour every part of the lower 48 by the closest selected route.
+"""Nearest-route regions: color every part of the lower 48 by the closest selected route.
 
 Lines -> densified points (each tagged with its route number) -> Voronoi cells ->
 dissolve by route number -> clip to the lower-48 outline. Distances are measured in
-Conus Albers (EPSG:5070) metres. Where a point belongs to several selected routes
+Conus Albers (EPSG:5070) meters. Where a point belongs to several selected routes
 (shared pavement, or coincident points at junctions) the lowest number wins.
 
 Usage: python scripts/voronoi.py [selection ...]   (default: all, see selection.py)
@@ -52,7 +52,7 @@ def voronoi_regions(pts, outline):
 
 
 def label_point(geom):
-    """Visual centre of the region's largest part."""
+    """Visual center of the region's largest part."""
     part = max(getattr(geom, "geoms", [geom]), key=lambda g: g.area)
     return polylabel(part, tolerance=2_000)
 
@@ -86,7 +86,7 @@ def run(name, outline, all_roads):
         m.add(f'  <path id="route-{n}" d="{m.line_d(group.geometry)}" stroke="{line_color(n)}" stroke-width="{width}"/>')
     m.add("</g>")
 
-    # route number at the visual centre of each region
+    # route number at the visual center of each region
     size = 13 if len(numbers) <= 12 else 10
     m.add(f'<g id="labels" font-family="{FONT}" font-size="{size}" font-weight="bold" text-anchor="middle" '
           f'paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">')

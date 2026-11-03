@@ -3,15 +3,15 @@
 Found while building Interstate-number maps of the lower 48 from
 `ne_10m_roads` **v5.2.0-pre** (GeoJSON from `nvkelso/natural-earth-vector@master`, Oct 2026).
 Each issue lists how to find the feature: `name`, `uident`, and its endpoints (lat, lon).
-Figures: magenta = problem feature, blue = related correctly-labelled routes,
+Figures: magenta = problem feature, blue = related correctly-labeled routes,
 orange dashed = where a missing road should be, gray = other Interstates (gray text = `name` field), tan = US highways, light gray = state routes.
 
 Could be filed as one issue with a checklist, or one issue per item.
 
 ---
 
-## 1. I-84 labelled `name="5"` east of Portland, OR
-![](01_portland_i84_labelled_5.png)
+## 1. I-84 labeled `name="5"` east of Portland, OR
+![](01_portland_i84_labeled_5.png)
 
 Two `level=Interstate` segments east of Portland have `name="5"`; they are I-84 (Banfield Fwy / Columbia River Gorge).
 
@@ -20,15 +20,15 @@ Two `level=Interstate` segments east of Portland have `name="5"`; they are I-84 
 | 20905 | (45.517, -122.677) → (45.531, -122.557) | `5` | `84` |
 | 23805 | (45.548, -122.222) → (45.536, -122.557) | `5` | `84` |
 
-## 2. I-90 (Mercer Island floating bridge) labelled `name="5"`, Seattle, WA
-![](02_seattle_i90_labelled_5.png)
+## 2. I-90 (Mercer Island floating bridge) labeled `name="5"`, Seattle, WA
+![](02_seattle_i90_labeled_5.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
 | 0 | (47.580, -122.176) → (47.594, -122.322) | `5` | `90` |
 
-## 3. I-94 and I-57 labelled `name="55"`, Chicago, IL
-![](03_chicago_i94_i57_labelled_55.png)
+## 3. I-94 and I-57 labeled `name="55"`, Chicago, IL
+![](03_chicago_i94_i57_labeled_55.png)
 
 I-55 (Stevenson Expwy) is correct; two other South Side expressways also carry `name="55"`.
 
@@ -43,14 +43,14 @@ I-55 (Stevenson Expwy) is correct; two other South Side expressways also carry `
 I-55 stops at the I-294 interchange (41.755, -87.856) and resumes at the I-80 interchange (41.488, -88.196).
 The ~40 km between (through Bolingbrook / Joliet) is missing.
 
-## 5. I-20 labelled `name="85"`, and I-85 missing south of downtown Atlanta, GA
-![](05_atlanta_i20_labelled_85_and_i85_missing.png)
+## 5. I-20 labeled `name="85"`, and I-85 missing south of downtown Atlanta, GA
+![](05_atlanta_i20_labeled_85_and_i85_missing.png)
 
 - uident 179505, (33.763, -84.491) → (33.739, -84.388), `name="85"`: this is I-20 west of downtown; should be `20`.
 - I-85 between downtown (where I-75 comes in, 33.739, -84.388) and the airport / I-285 (33.619, -84.485) is missing, so I-85 is broken in two.
 
-## 6. Kansas Turnpike (I-35) labelled `name="235"`, Wichita, KS
-![](06_wichita_kansas_turnpike_labelled_235.png)
+## 6. Kansas Turnpike (I-35) labeled `name="235"`, Wichita, KS
+![](06_wichita_kansas_turnpike_labeled_235.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
@@ -58,8 +58,8 @@ The ~40 km between (through Bolingbrook / Joliet) is missing.
 
 The real I-235 (west-side loop) is a separate feature. Also related: uident 146505, (37.679, -97.310) → (37.608, -97.310) has an empty `level` and `name`.
 
-## 7. I-44 through Tulsa, OK labelled `name="75"` and `name="244"`
-![](07_tulsa_i44_labelled_75_and_244.png)
+## 7. I-44 through Tulsa, OK labeled `name="75"` and `name="244"`
+![](07_tulsa_i44_labeled_75_and_244.png)
 
 The chain of Interstate features from the Turner Turnpike to Missouri is `44 → 75 → 75 → 244 → 44`. There is no I-75 in Oklahoma,
 and the 80 km "244" segment is the Will Rogers Turnpike (I-44).
@@ -87,15 +87,15 @@ through Covington (should be `name=75`, `namealt=71`).
 
 uident 141905, (36.045, -79.774) → (36.031, -79.812): no `level`, no `name`. It's the link where I-85 joins I-40 (I-40/85 shared).
 
-## 11. I-80 labelled `name="70"` near York, NE
-![](11_nebraska_i80_labelled_70.png)
+## 11. I-80 labeled `name="70"` near York, NE
+![](11_nebraska_i80_labeled_70.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
 | 110805 | (40.821, -97.595) → (40.823, -97.044) | `70` | `80` |
 
-## 12. I-40 labelled `name="44"` at Fort Smith, AR
-![](12_fort_smith_i40_labelled_44.png)
+## 12. I-40 labeled `name="44"` at Fort Smith, AR
+![](12_fort_smith_i40_labeled_44.png)
 
 There is no I-44 in Arkansas; these two segments link the Oklahoma and Arkansas parts of I-40.
 
@@ -114,7 +114,7 @@ There is no I-44 in Arkansas; these two segments link the Oklahoma and Arkansas 
 ## 14. State routes classed as US highways (`level=Federal`)
 ![](14_kentucky_state_route_15_as_us.png)
 
-These `level=Federal` segments carry numbers of US routes that don't run there (or don't exist). In most cases neighbouring
+These `level=Federal` segments carry numbers of US routes that don't run there (or don't exist). In most cases neighboring
 segments of the same road are already `level=State`. Should be `level=State`.
 
 | uident | where | name | actually |

@@ -13,7 +13,7 @@ OUT = ROOT / "data" / "processed"
 
 EXCLUDE_STATES = {"AK", "HI"}
 ROAD_LEVELS = {"Interstate", "Federal"}  # Federal == US highways
-CRS = "EPSG:5070"  # NAD83 / Conus Albers (metres)
+CRS = "EPSG:5070"  # NAD83 / Conus Albers (meters)
 CLIP_BUFFER_M = 10_000
 # Longest gap to try bridging along the same-level network. Interstates share pavement for
 # long stretches (I-20/59 Birmingham-Meridian ~250 km); US routes mostly vanish onto

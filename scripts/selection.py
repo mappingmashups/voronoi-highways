@@ -1,4 +1,4 @@
-"""Which routes to show, and the colour each route number gets."""
+"""Which routes to show, and the color each route number gets."""
 import colorsys
 
 # Each selection: which road level, which route numbers, and a title.
@@ -29,7 +29,7 @@ def route_numbers(routes):
 
 
 # Rainbow: route number on a fixed 0-100 scale -> hue from red (0) to violet (100).
-# A lookup by number, not by rank, so uneven subsets keep consistent colours.
+# A lookup by number, not by rank, so uneven subsets keep consistent colors.
 SCALE = (0, 100)
 HUE_RANGE = (0, 285)  # degrees: red ... violet
 

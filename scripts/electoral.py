@@ -4,7 +4,7 @@ give them populations and electoral votes, and replay the 2024 presidential elec
 Usage: python scripts/electoral.py
 Reads results/bivariate_x5_odd__x10.geojson and writes results/electoral_x5_odd__x10.csv.
 
-- Population: Census 2020 block-group centres of population, each assigned to the zone it
+- Population: Census 2020 block-group centers of population, each assigned to the zone it
   falls in (or the nearest zone, for points just off the clipped coastline).
 - Votes: 2024 county results, shared out to each county's block groups by population. Where
   a state's vote units don't match Census counties (Connecticut's planning regions, DC's

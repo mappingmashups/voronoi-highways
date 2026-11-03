@@ -1,9 +1,9 @@
-"""Animated GIF of a palette turning one full revolution around its colour ring.
+"""Animated GIF of a palette turning one full revolution around its color ring.
 
 Drives the built palette page (docs/index.html) in headless Chromium, so the frames use the
-page's own colour code, then assembles them into a looping GIF. With ffmpeg installed, the GIF
-uses one colour table built from every frame and stores only what changes between frames,
-about half the size of the fallback (a separate colour table per frame, via Pillow).
+page's own color code, then assembles them into a looping GIF. With ffmpeg installed, the GIF
+uses one color table built from every frame and stores only what changes between frames,
+about half the size of the fallback (a separate color table per frame, via Pillow).
 
 Usage: python scripts/spin_gif.py [palette] [--frames N] [--ms MS] [--width PX] [--out PATH]
        default: compass_centered_gray, 180 frames (2° apart), 40 ms each, 480 px wide,
@@ -26,10 +26,10 @@ ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "docs" / "index.html"
 
 SET_RING = """([pid, deg]) => {
-  // colour the major-routes map with the palette turned `deg` degrees around its colour ring
+  // color the major-routes map with the palette turned `deg` degrees around its color ring
   const {makeFn, orientSpec, ringable, norm, DATA} = window.__ipl, pair = DATA.pairs[0];
   const spec = DATA.presets.find(p => p.id === pid).spec;
-  if (!ringable(spec)) throw new Error(pid + " has no colour ring to turn");
+  if (!ringable(spec)) throw new Error(pid + " has no color ring to turn");
   const fn = makeFn(orientSpec(spec, {rot: 0, mirror: false, ring: deg}), pair);
   document.querySelectorAll('#views .map .cell').forEach(e => {
     const c = pair.cells[+e.dataset.i], h = fn(norm(c.ns), norm(c.ew));
@@ -55,7 +55,7 @@ def main():
         page.goto(PAGE.as_uri())
         page.wait_for_timeout(600)
         page.click(f'.preset[data-id="{args.palette}"]')
-        page.wait_for_timeout(2000)  # let the palette's fade-in and route-line colour settle
+        page.wait_for_timeout(2000)  # let the palette's fade-in and route-line color settle
         mapsvg = page.locator("#views .map").first
         for k in range(args.frames):
             page.evaluate(SET_RING, [args.palette, k * 360 / args.frames])
@@ -74,7 +74,7 @@ def main():
                  "-loop", "0", str(out)],
                 check=True)
     else:
-        # a colour table per frame keeps the gradients accurate without frame-to-frame shimmer
+        # a color table per frame keeps the gradients accurate without frame-to-frame shimmer
         q = [f.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE) for f in frames]
         q[0].save(out, save_all=True, append_images=q[1:], duration=args.ms, loop=0)
     w, h = frames[0].size
