@@ -11,7 +11,7 @@ Could be filed as one issue with a checklist, or one issue per item.
 ---
 
 ## 1. I-84 labeled `name="5"` east of Portland, OR
-![](01_portland_i84_labeled_5.png)
+![I-84 labeled name="5" east of Portland, OR](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/01_portland_i84_labeled_5.png)
 
 Two `level=Interstate` segments east of Portland have `name="5"`; they are I-84 (Banfield Fwy / Columbia River Gorge).
 
@@ -21,14 +21,14 @@ Two `level=Interstate` segments east of Portland have `name="5"`; they are I-84 
 | 23805 | (45.548, -122.222) → (45.536, -122.557) | `5` | `84` |
 
 ## 2. I-90 (Mercer Island floating bridge) labeled `name="5"`, Seattle, WA
-![](02_seattle_i90_labeled_5.png)
+![I-90 (Mercer Island floating bridge) labeled name="5", Seattle, WA](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/02_seattle_i90_labeled_5.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
 | 0 | (47.580, -122.176) → (47.594, -122.322) | `5` | `90` |
 
 ## 3. I-94 and I-57 labeled `name="55"`, Chicago, IL
-![](03_chicago_i94_i57_labeled_55.png)
+![I-94 and I-57 labeled name="55", Chicago, IL](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/03_chicago_i94_i57_labeled_55.png)
 
 I-55 (Stevenson Expwy) is correct; two other South Side expressways also carry `name="55"`.
 
@@ -38,19 +38,19 @@ I-55 (Stevenson Expwy) is correct; two other South Side expressways also carry `
 | 0 | (41.627, -87.696) → (41.736, -87.613) | `55` | `57` |
 
 ## 4. I-55 missing between I-294 and I-80, SW Chicago suburbs, IL
-![](04_chicago_i55_missing.png)
+![I-55 missing between I-294 and I-80, SW Chicago suburbs, IL](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/04_chicago_i55_missing.png)
 
 I-55 stops at the I-294 interchange (41.755, -87.856) and resumes at the I-80 interchange (41.488, -88.196).
 The ~40 km between (through Bolingbrook / Joliet) is missing.
 
 ## 5. I-20 labeled `name="85"`, and I-85 missing south of downtown Atlanta, GA
-![](05_atlanta_i20_labeled_85_and_i85_missing.png)
+![I-20 labeled name="85", and I-85 missing south of downtown Atlanta, GA](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/05_atlanta_i20_labeled_85_and_i85_missing.png)
 
 - uident 179505, (33.763, -84.491) → (33.739, -84.388), `name="85"`: this is I-20 west of downtown; should be `20`.
 - I-85 between downtown (where I-75 comes in, 33.739, -84.388) and the airport / I-285 (33.619, -84.485) is missing, so I-85 is broken in two.
 
 ## 6. Kansas Turnpike (I-35) labeled `name="235"`, Wichita, KS
-![](06_wichita_kansas_turnpike_labeled_235.png)
+![Kansas Turnpike (I-35) labeled name="235", Wichita, KS](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/06_wichita_kansas_turnpike_labeled_235.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
@@ -59,7 +59,7 @@ The ~40 km between (through Bolingbrook / Joliet) is missing.
 The real I-235 (west-side loop) is a separate feature. Also related: uident 146505, (37.679, -97.310) → (37.608, -97.310) has an empty `level` and `name`.
 
 ## 7. I-44 through Tulsa, OK labeled `name="75"` and `name="244"`
-![](07_tulsa_i44_labeled_75_and_244.png)
+![I-44 through Tulsa, OK labeled name="75" and name="244"](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/07_tulsa_i44_labeled_75_and_244.png)
 
 The chain of Interstate features from the Turner Turnpike to Missouri is `44 → 75 → 75 → 244 → 44`. There is no I-75 in Oklahoma,
 and the 80 km "244" segment is the Will Rogers Turnpike (I-44).
@@ -71,31 +71,31 @@ and the 80 km "244" segment is the Will Rogers Turnpike (I-44).
 | 163705 | (36.162, -95.975) → (36.561, -95.219) | `244` | `44` |
 
 ## 8. I-65 doesn't connect north of downtown Nashville, TN
-![](08_nashville_i65_gap.png)
+![I-65 doesn't connect north of downtown Nashville, TN](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/08_nashville_i65_gap.png)
 
 I-65 north (uident 154205) starts at (36.269, -86.731), about 6 km from the I-24 line (I-24/65 shared section), and doesn't
 connect to it. Either the missing link or an undershoot.
 
 ## 9. I-71/I-75 segment with empty `name`, Cincinnati, OH / KY
-![](09_cincinnati_i71_i75_no_name.png)
+![I-71/I-75 segment with empty name, Cincinnati, OH / KY](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/09_cincinnati_i71_i75_no_name.png)
 
 uident 120005, (39.062, -84.537) → (38.878, -84.621), `level=Interstate`, `name` empty. This is the I-71/I-75 shared section
 through Covington (should be `name=75`, `namealt=71`).
 
 ## 10. I-40/I-85 link with empty `level` and `name`, Greensboro, NC
-![](10_greensboro_i40_i85_no_level.png)
+![I-40/I-85 link with empty level and name, Greensboro, NC](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/10_greensboro_i40_i85_no_level.png)
 
 uident 141905, (36.045, -79.774) → (36.031, -79.812): no `level`, no `name`. It's the link where I-85 joins I-40 (I-40/85 shared).
 
 ## 11. I-80 labeled `name="70"` near York, NE
-![](11_nebraska_i80_labeled_70.png)
+![I-80 labeled name="70" near York, NE](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/11_nebraska_i80_labeled_70.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
 | 110805 | (40.821, -97.595) → (40.823, -97.044) | `70` | `80` |
 
 ## 12. I-40 labeled `name="44"` at Fort Smith, AR
-![](12_fort_smith_i40_labeled_44.png)
+![I-40 labeled name="44" at Fort Smith, AR](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/12_fort_smith_i40_labeled_44.png)
 
 There is no I-44 in Arkansas; these two segments link the Oklahoma and Arkansas parts of I-40.
 
@@ -105,14 +105,14 @@ There is no I-44 in Arkansas; these two segments link the Oklahoma and Arkansas 
 | 170405 | (35.472, -94.325) → (35.524, -94.222) | `44` | `40` |
 
 ## 13. US 2/97 shared section has `namealt="95"`, Wenatchee, WA
-![](13_wenatchee_us2_namealt_95.png)
+![US 2/97 shared section has namealt="95", Wenatchee, WA](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/13_wenatchee_us2_namealt_95.png)
 
 | uident | endpoints | is | should be |
 |---|---|---|---|
 | 11405 | (47.561, -120.600) → (47.623, -120.235) | `name=2`, `namealt=95` | `namealt=97` |
 
 ## 14. State routes classed as US highways (`level=Federal`)
-![](14_kentucky_state_route_15_as_us.png)
+![State routes classed as US highways (level=Federal)](https://raw.githubusercontent.com/mappingmashups/voronoi-highways/e81dd5aaedd92f9d8c6d46d4fa18aeb8b5dfd3e0/docs/natural-earth-issues/14_kentucky_state_route_15_as_us.png)
 
 These `level=Federal` segments carry numbers of US routes that don't run there (or don't exist). In most cases neighboring
 segments of the same road are already `level=State`. Should be `level=State`.
