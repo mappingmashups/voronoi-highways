@@ -85,6 +85,8 @@ python scripts/check_web.py docs/index.html
 
 `python scripts/check_pages.py` reports whether `docs/index.html` is behind its sources: the page template, the palette presets, or the Electoral College CSV. It runs on GitHub Actions for every pull request and push to `main` (`.github/workflows/pages-check.yml`). It doesn't need the data pipeline, so it can't tell whether the map geometry is current; rebuild after rerunning the pipeline too.
 
+The page's `<head>` carries Open Graph and Twitter card tags, so links to it unfurl with a preview image on social media and chat apps. That image, `docs/images/social_card.png` (1200×630), is made by `python scripts/social_card.py` from the map in `docs/images/bivariate_compass_centered.png`; rerun it if that map or the card's text changes.
+
 `docs/.nojekyll` tells Pages to serve the files as they are, without running Jekyll.
 
 ### Easter egg: the Interstate Electoral College

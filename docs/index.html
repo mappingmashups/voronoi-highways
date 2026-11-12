@@ -11,6 +11,17 @@ img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
 <title>Voronoi Highways</title>
+<meta name="description" content="Every point in the lower 48, colored by its nearest north–south and nearest east–west Interstate. Pick a palette, build your own, or let the map drift through all of them.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Voronoi Highways">
+<meta property="og:title" content="Voronoi Highways">
+<meta property="og:description" content="Every point in the lower 48, colored by its nearest north–south and nearest east–west Interstate.">
+<meta property="og:url" content="https://mappingmashups.github.io/voronoi-highways/">
+<meta property="og:image" content="https://mappingmashups.github.io/voronoi-highways/images/social_card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Map of the lower 48 states divided into zones by nearest Interstate, colored from purple in the northwest through orange in the southwest to green in the northeast.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,6 +70,10 @@ header { display: flex; gap: 14px; align-items: center; }
 header svg { flex: none; width: 44px; height: 46px; }
 h1 { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.15rem); font-weight: 800; margin: 0; letter-spacing: -0.01em; line-height: 1.1; text-wrap: balance; }
 .lede { margin: 2px 0 0; color: var(--muted); max-width: 70ch; }
+.repo { margin-left: auto; align-self: flex-start; flex: none; display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 0.86rem; font-weight: 600; text-decoration: none; padding: 6px 10px; border: 1px solid var(--line, currentColor); border-radius: 8px; }
+.repo:hover { color: var(--accent); border-color: var(--accent); }
+.repo svg { width: 16px; height: 16px; }
+@media (max-width: 640px) { .repo span { display: none; } .repo { padding: 7px; } }
 
 .work { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
 @media (max-width: 960px) { .work { grid-template-columns: minmax(0, 1fr); } }
@@ -176,6 +191,7 @@ footer a { color: var(--accent); }
       <h1>Voronoi Highways</h1>
       <p class="lede">Every point in the lower 48 is colored by its nearest north–south (odd) and nearest east–west (even) Interstate. Pick a palette, build your own, or let the map drift through all of them.</p>
     </div>
+    <a class="repo" href="https://github.com/mappingmashups/voronoi-highways" aria-label="Code on GitHub" title="Code on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>Code on GitHub</span></a>
   </header>
 
   <section class="map-card ec" id="ec" hidden aria-labelledby="ec-title">
@@ -322,7 +338,7 @@ footer a { color: var(--accent); }
   </div>
   <footer>
     <p>Regions are nearest-route Voronoi cells built from Natural Earth 1:10m roads (with label fixes), measured in Conus Albers. Route numbers map onto a fixed 0–100 scale on both axes, so colors stay comparable between the two networks. Saved palettes stay in this browser only.</p>
-    <p>This map was created for the <a href="https://30daymapchallenge.com/">#30DayMapChallenge</a> Day 3: Polygons. Concept and direction by <a href="https://mappingmashups.net/">Alan McConchie</a>, code implemented by <a href="https://claude.ai">Claude</a>.</p>
+    <p>This map was created for the <a href="https://30daymapchallenge.com/">#30DayMapChallenge</a> Day 3: Polygons. Concept and direction by <a href="https://mappingmashups.net/">Alan McConchie</a>, code implemented by <a href="https://claude.ai">Claude</a>. Source code and data pipeline: <a href="https://github.com/mappingmashups/voronoi-highways">github.com/mappingmashups/voronoi-highways</a>.</p>
   </footer>
 </div>
 
